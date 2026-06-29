@@ -20,6 +20,8 @@ Plus a meta-skill — `install` — that drops the whole library into whatever h
 
 ## Install
 
+👉 New here? See the **[easy install guide](INSTALL.md)** for copy-paste steps (Claude Code, Codex, Windows).
+
 ### Option A — auto-install script (any harness)
 The script detects your harness (`.claude`, `.github`, `.cursor`, `.codex`, `.gemini`) and copies the
 skills into the right folder:
