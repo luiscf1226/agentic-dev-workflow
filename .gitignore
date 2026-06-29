@@ -1,0 +1,10 @@
+# Generated workflow artifacts
+problem.md
+problem.graph.mmd
+spec.md
+phases.md
+design-tokens.json
+
+# OS / editor cruft
+.DS_Store
+*.swp
