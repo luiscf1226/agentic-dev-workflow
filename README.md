@@ -5,7 +5,7 @@ Each step is its own skill in the open [Agent Skills](https://agentskills.io) fo
 run **one, several, or all** of them — with Claude Code, Codex, Cursor, Gemini CLI, or any harness
 that supports the standard. No step depends on another; pick what you need.
 
-## The 7 skills
+## The 8 skills
 | Step | Skill | What it does |
 |------|-------|--------------|
 | 1 | `problem` | Grills you until the problem is agreed, emits a concept graph |
@@ -13,10 +13,13 @@ that supports the standard. No step depends on another; pick what you need.
 | 3 | `phases` | Breaks work into ordered phases + dependency graph |
 | 4 | `issues` | Turns phases into GitHub issues (gh CLI or GitHub MCP) |
 | 5 | `design` | Full screens + design system, exports tokens |
-| 6 | `plan-parallelize` | Master plan + per-issue sub-plans + worktree waves. **Optional:** promote any issue to a Lavish plan (on request, not automatic) |
-| 7 | `pr-no-mistakes` | Runs the no-mistakes gate; PR description carries **screenshot (if UI) + scope + system impact** |
+| 6 | `plan-parallelize` | Master plan + per-issue sub-plans + worktree waves. **Single mode (`--single`):** one issue → one sub-plan + baton. **Optional:** promote any issue to a Lavish plan (on request) |
+| 7 | `execute-plan` | Executes one approved sub-plan — auto-detects **create / modify / fix / test**, leaves evidence, keeps the baton current |
+| 8 | `pr-no-mistakes` | Runs the no-mistakes gate; PR description carries **screenshot (if UI) + scope + system impact** |
 
-Plus a meta-skill — `install` — that drops the whole library into whatever harness you're running.
+Plus a meta-skill — `install` — that drops the whole library into whatever harness you're running, and a
+cross-cutting rescue — `handoff` — that verifies and writes a resumable **baton** so an in-flight task can
+move to a fresh session on a bad approach, lost context, or session switch.
 
 ## Install
 
@@ -58,13 +61,23 @@ Run the steps in order, or jump to whichever one you need — nothing is coupled
 5. **`design`** *(only if there's a UI)* — produces full screens + a design system and exports
    `design-tokens.json`.
 6. **`plan-parallelize`** — writes one **master plan** (you review this) plus auto-governed per-issue
-   sub-plans, and assigns parallel work across git worktrees (cap ~4). Optionally promote an issue to an
-   interactive **Lavish** plan — only when you ask.
-7. **`pr-no-mistakes`** — on a committed feature branch, runs the no-mistakes gate (review, test, lint,
-   PR, CI) and writes a PR description carrying **screenshot (if UI) + scope + system impact**.
+   sub-plans, and assigns parallel work across git worktrees (cap ~4). **Single mode (`--single`)** skips
+   the waves: one issue → one sub-plan + a seeded **baton**. Optionally promote an issue to an interactive
+   **Lavish** plan — only when you ask.
+7. **`execute-plan`** — executes one approved sub-plan/baton. It **auto-detects the task-type** (create,
+   modify, fix, or test) and runs the matching approach, leaving evidence and keeping the baton current.
+   If the session goes sideways, it invokes `handoff`.
+8. **`pr-no-mistakes`** — on a committed feature branch, runs the no-mistakes gate (review, test, lint,
+   PR, CI) and writes a PR description carrying **screenshot (if UI) + scope + system impact**. Its test
+   step doubles as the **pre-handoff checkpoint**.
 
-**Typical run:** `problem → spec → phases → issues → design → plan-parallelize`, then build each issue in
-its worktree and close with `pr-no-mistakes` per PR. **Quick patch:** skip straight to `pr-no-mistakes`.
+**Cross-cutting — `handoff`:** when a session hits a **bad approach, lost context, or a deliberate session
+switch**, `handoff` runs the test gate first (never hands off broken work), then writes a resumable
+**baton** (`templates/baton.md`) the next session reads and continues from — no re-planning.
+
+**Typical run:** `problem → spec → phases → issues → design → plan-parallelize → execute-plan`, closing
+with `pr-no-mistakes` per PR. **Single task:** `plan-parallelize --single → execute-plan → pr-no-mistakes`.
+**Quick patch:** skip straight to `pr-no-mistakes`.
 Every step inherits the rules in `constitution.md` — scope discipline, evidence before "done", small PRs.
 
 ## External skills it leans on
