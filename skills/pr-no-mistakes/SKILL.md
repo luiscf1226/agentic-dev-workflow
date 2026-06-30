@@ -27,3 +27,5 @@ The final step, on a committed feature branch, before the PR reaches main.
 
 ## Note
 - No merge queue by design. Keep changes small and scoped so each PR is safe on its own.
+- The gate's **test step is also the pre-handoff checkpoint**: run it before any `handoff` so a session
+  never passes unverified or broken work to the next one.

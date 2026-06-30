@@ -10,6 +10,10 @@ license: MIT
 After `issues`, before building. Scales from 1 to many issues.
 
 ## Procedure
+0. **Single mode (one issue) — `--single`:** skip the master plan and waves. Write exactly one sub-plan
+   for the chosen issue and seed a baton from `templates/baton.md`. The human approves that one plan,
+   then `execute-plan` builds it and `pr-no-mistakes` ships it. Use this for a single focused task; use
+   the steps below for many issues.
 1. **Master plan (human reviews this one):** order issues into dependency-driven waves with a concurrency
    cap (default 4 worktrees). Output it as a plan the human approves.
 2. **Sub-plans (auto-governed):** for each issue write a sub-plan using `templates/sub-plan.md`
@@ -22,6 +26,7 @@ After `issues`, before building. Scales from 1 to many issues.
 
 ## Output
 - Master plan, per-issue sub-plans, worktree assignment. Optionally a Lavish plan (on request).
+- Single mode: one approved sub-plan + a seeded baton (`templates/baton.md`) for `execute-plan`.
 
 ## Rules
 - Each agent touches only files in its sub-plan's scope.

@@ -4,8 +4,10 @@ Skills live in `skills/`. Each is a self-contained folder with a `SKILL.md`.
 Load the one whose description matches the task; ignore the rest.
 
 To make these skills available in this harness, load `skills/install/SKILL.md` (or run `./install.sh`).
-The intended order is `problem → spec → phases → issues → design → plan-parallelize → pr-no-mistakes`,
-but each is independent — run any subset.
+The intended order is
+`problem → spec → phases → issues → design → plan-parallelize → execute-plan → pr-no-mistakes`,
+but each is independent — run any subset. `handoff` is a cross-cutting rescue: invoke it from inside
+`execute-plan` when a session hits a bad approach, lost context, or a deliberate session switch.
 
 ## Non-negotiables (apply to every skill)
 1. **Surface assumptions before building.** If requirements conflict, stop and ask.
