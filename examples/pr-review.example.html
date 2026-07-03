@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<!-- EXAMPLE OUTPUT of the pr-review-page skill for a sample PR (#42, "add email verification").
+     Fully self-contained (screenshots embedded) — open or share this single file to see what the skill produces. -->
+<!--
+  pr-review.html — self-contained interactive PR review page.
+
+  The `pr-review-page` skill fills the REVIEW object below (marked REVIEW DATA)
+  from a real pull request, then writes the result as `pr-<n>-review.html`.
+  Everything renders from that object. No external network, no secrets, no build step.
+  Open the file in any browser. Reviewers read the summary, DB tables, endpoints, and
+  before/after screenshots — never the raw diff — and leave questions that export as
+  @claude comments to post on the PR.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PR review</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --panel-2: #1c2230; --border: #2b3444;
+    --text: #e6edf3; --muted: #8b98a9; --faint: #6b7688;
+    --accent: #6ea8fe; --accent-2: #a371f7;
+    --add: #3fb950; --add-bg: #12261c; --add-br: #1f6f38;
+    --rm: #f85149;  --rm-bg: #2b1416;  --rm-br: #7a2a2a;
+    --chg: #d29922; --chg-bg: #2a2113; --chg-br: #7a5c1e;
+    --get: #6ea8fe; --post: #3fb950; --put: #d29922; --del: #f85149;
+    --radius: 12px; --shadow: 0 8px 30px rgba(0,0,0,.35);
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--text); font-family: var(--sans);
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+    padding: 0 0 120px;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code, .mono { font-family: var(--mono); font-size: .88em; }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+  /* ---- header ---- */
+  header.hero {
+    background: linear-gradient(180deg, #12182280, transparent), var(--panel);
+    border-bottom: 1px solid var(--border); padding: 26px 0 22px; margin-bottom: 26px;
+  }
+  .hero .eyebrow { color: var(--muted); font-size: 13px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .hero h1 { font-size: 26px; margin: 8px 0 6px; line-height: 1.25; }
+  .hero .meta { color: var(--muted); font-size: 13px; display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+  .badges { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 4px; }
+  .badge {
+    font-size: 12px; font-weight: 600; letter-spacing: .02em; padding: 4px 10px;
+    border-radius: 999px; border: 1px solid var(--border); background: var(--panel-2); color: var(--text);
+  }
+  .badge.frontend { border-color: #6ea8fe55; background: #12203a; color: #9cc3ff; }
+  .badge.backend  { border-color: #a371f755; background: #221a3a; color: #c9aaff; }
+  .badge.change   { border-color: #d2992255; background: #2a2113; color: #f0c766; }
+  .badge.blast-Low    { border-color: var(--add-br); background: var(--add-bg); color: #7ee2a0; }
+  .badge.blast-Medium { border-color: var(--chg-br); background: var(--chg-bg); color: #f0c766; }
+  .badge.blast-High   { border-color: var(--rm-br);  background: var(--rm-bg);  color: #ff9a94; }
+  .summary { margin: 14px 0 0; color: var(--text); font-size: 15.5px; max-width: 78ch; }
+  .stats { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 16px; font-size: 13px; color: var(--muted); }
+  .stats b { color: var(--text); }
+  .stats .add { color: var(--add); } .stats .rm { color: var(--rm); }
+
+  /* ---- sections ---- */
+  section { margin: 34px 0; }
+  .sec-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+  .sec-head h2 { font-size: 19px; margin: 0; }
+  .sec-head .count { color: var(--faint); font-size: 13px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px 18px; margin-bottom: 16px; box-shadow: var(--shadow);
+  }
+  .card > .card-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+  .card .note { color: var(--muted); font-size: 13.5px; margin: 2px 0 8px; }
+
+  .pill { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: .03em; }
+  .pill.added    { background: var(--add-bg); color: #7ee2a0; border: 1px solid var(--add-br); }
+  .pill.removed  { background: var(--rm-bg);  color: #ff9a94; border: 1px solid var(--rm-br); }
+  .pill.modified,.pill.changed { background: var(--chg-bg); color: #f0c766; border: 1px solid var(--chg-br); }
+
+  /* ---- db tables ---- */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+  table.schema { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 560px; }
+  table.schema th, table.schema td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  table.schema thead th { background: var(--panel-2); color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  table.schema tbody tr:last-child td { border-bottom: none; }
+  table.schema td.col-name { font-family: var(--mono); color: var(--text); }
+  tr.row-added   { background: var(--add-bg); }
+  tr.row-removed { background: var(--rm-bg); }
+  tr.row-changed { background: var(--chg-bg); }
+  tr.row-removed td.col-name { text-decoration: line-through; color: #ff9a94; }
+  .was { color: var(--faint); font-size: 12px; }
+  .marker { display: inline-block; width: 16px; color: var(--faint); font-weight: 700; }
+  .marker.added { color: var(--add); } .marker.removed { color: var(--rm); } .marker.changed { color: var(--chg); }
+
+  /* ---- endpoints ---- */
+  .method { font-family: var(--mono); font-weight: 700; font-size: 12px; padding: 3px 9px; border-radius: 6px; color: #0d1117; }
+  .method.GET { background: var(--get); } .method.POST { background: var(--post); }
+  .method.PUT, .method.PATCH { background: var(--put); } .method.DELETE { background: var(--del); }
+  .path { font-family: var(--mono); font-size: 14px; color: var(--text); }
+  .kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; font-size: 13px; margin-top: 8px; }
+  .kv dt { color: var(--muted); }
+  .subhead { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; margin: 12px 0 6px; }
+  ul.params { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+  ul.params li { font-size: 13px; }
+  ul.params .pname { font-family: var(--mono); color: var(--text); }
+  ul.params .req { color: var(--rm); font-size: 11px; }
+  .resp { display: flex; gap: 8px; align-items: baseline; font-size: 13px; margin: 2px 0; }
+  .code-badge { font-family: var(--mono); font-weight: 700; padding: 1px 7px; border-radius: 5px; background: var(--panel-2); border: 1px solid var(--border); }
+  pre.shape { margin: 6px 0 0; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; overflow-x: auto; font-size: 12.5px; }
+
+  /* ---- screens (before/after) ---- */
+  .ba { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+  @media (max-width: 720px) { .ba { grid-template-columns: 1fr; } }
+  .ba figure { margin: 0; }
+  .ba figcaption { font-size: 12px; color: var(--muted); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+  .ba figcaption .tag { font-weight: 700; }
+  .ba .before figcaption .tag { color: var(--rm); }
+  .ba .after  figcaption .tag { color: var(--add); }
+  .ba img { width: 100%; border: 1px solid var(--border); border-radius: 8px; display: block; cursor: zoom-in; background: #fff; }
+  .noimg { border: 1px dashed var(--border); border-radius: 8px; padding: 22px; text-align: center; color: var(--faint); font-size: 13px; }
+
+  /* ---- files table ---- */
+  table.files { border-collapse: collapse; width: 100%; font-size: 13px; }
+  table.files td { padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  table.files td:first-child { font-family: var(--mono); }
+  table.files td.num { text-align: right; white-space: nowrap; }
+  table.files .add { color: var(--add); } table.files .rm { color: var(--rm); }
+
+  /* ---- ask buttons / Q&A ---- */
+  .ask-btn {
+    margin-left: auto; font-size: 12px; color: var(--muted); background: transparent;
+    border: 1px solid var(--border); border-radius: 8px; padding: 3px 10px; cursor: pointer; white-space: nowrap;
+  }
+  .ask-btn:hover { color: var(--text); border-color: var(--accent); }
+  .ask-btn .n { color: var(--accent); font-weight: 700; }
+
+  .composer { margin-top: 10px; display: none; gap: 8px; }
+  .composer.open { display: flex; }
+  .composer textarea {
+    flex: 1; resize: vertical; min-height: 44px; background: var(--bg); color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-family: var(--sans); font-size: 13.5px;
+  }
+  .composer button.add-q {
+    align-self: flex-end; background: var(--accent); color: #0d1117; border: none; border-radius: 8px;
+    font-weight: 700; padding: 8px 14px; cursor: pointer; font-size: 13px;
+  }
+  .qlist { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-direction: column; gap: 6px; }
+  .qlist li { background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 13px; display: flex; gap: 8px; }
+  .qlist li .rmq { margin-left: auto; color: var(--faint); cursor: pointer; border: none; background: none; font-size: 14px; }
+  .qlist li .rmq:hover { color: var(--rm); }
+
+  /* ---- floating dock + drawer ---- */
+  .dock {
+    position: fixed; right: 20px; bottom: 20px; z-index: 40;
+    background: var(--accent); color: #0d1117; border: none; border-radius: 999px;
+    font-weight: 700; padding: 12px 18px; cursor: pointer; box-shadow: var(--shadow); font-size: 14px;
+  }
+  .dock .n { background: #0d1117; color: var(--accent); border-radius: 999px; padding: 0 7px; margin-left: 6px; font-size: 12px; }
+  .drawer {
+    position: fixed; inset: 0 0 0 auto; width: min(440px, 100%); background: var(--panel);
+    border-left: 1px solid var(--border); box-shadow: var(--shadow); z-index: 50;
+    transform: translateX(100%); transition: transform .18s ease; display: flex; flex-direction: column;
+  }
+  .drawer.open { transform: none; }
+  .drawer header { padding: 16px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .drawer header h3 { margin: 0; font-size: 16px; }
+  .drawer header .x { margin-left: auto; background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; }
+  .drawer .body { padding: 16px 18px; overflow-y: auto; flex: 1; }
+  .drawer .empty { color: var(--faint); font-size: 13.5px; text-align: center; margin-top: 40px; }
+  .qgroup { margin-bottom: 16px; }
+  .qgroup .anchor { font-size: 12px; color: var(--accent); font-weight: 600; margin-bottom: 4px; }
+  .qgroup .q { font-size: 13.5px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; margin-bottom: 6px; display: flex; gap: 8px; }
+  .qgroup .q .rmq { margin-left: auto; background: none; border: none; color: var(--faint); cursor: pointer; }
+  .drawer footer { padding: 14px 18px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+  .drawer footer .row { display: flex; gap: 8px; }
+  .drawer footer button {
+    flex: 1; border: 1px solid var(--border); background: var(--panel-2); color: var(--text);
+    border-radius: 8px; padding: 9px; cursor: pointer; font-weight: 600; font-size: 13px;
+  }
+  .drawer footer button.primary { background: var(--accent); color: #0d1117; border: none; }
+  .drawer footer button:hover { border-color: var(--accent); }
+  .drawer footer .hint { color: var(--faint); font-size: 12px; }
+  .drawer footer .hint code { color: var(--muted); background: var(--bg); padding: 1px 5px; border-radius: 4px; }
+  .toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); background: var(--panel-2);
+    border: 1px solid var(--accent); color: var(--text); padding: 10px 16px; border-radius: 10px; z-index: 60;
+    opacity: 0; transition: opacity .2s; font-size: 13.5px; pointer-events: none; }
+  .toast.show { opacity: 1; }
+
+  /* lightbox */
+  .lightbox { position: fixed; inset: 0; background: #000c; z-index: 70; display: none; align-items: center; justify-content: center; padding: 30px; }
+  .lightbox.open { display: flex; }
+  .lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; }
+
+  .footnote { color: var(--faint); font-size: 12.5px; border-top: 1px solid var(--border); margin-top: 40px; padding-top: 16px; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">
+      <span id="repo"></span> · <span>PR <a id="pr-link" target="_blank" rel="noopener"></a></span>
+    </div>
+    <h1 id="title"></h1>
+    <div class="meta">
+      <span>by <b id="author"></b></span>
+      <span class="mono" id="branches"></span>
+    </div>
+    <div class="badges" id="badges"></div>
+    <p class="summary" id="summary"></p>
+    <div class="stats" id="stats"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="sec-db" hidden>
+    <div class="sec-head"><h2>Database model changes</h2><span class="count" id="db-count"></span></div>
+    <div id="db-body"></div>
+  </section>
+
+  <section id="sec-ep" hidden>
+    <div class="sec-head"><h2>Endpoints</h2><span class="count" id="ep-count"></span></div>
+    <div id="ep-body"></div>
+  </section>
+
+  <section id="sec-screens" hidden>
+    <div class="sec-head"><h2>Frontend — before / after</h2><span class="count" id="sc-count"></span></div>
+    <div id="sc-body"></div>
+  </section>
+
+  <section id="sec-files" hidden>
+    <div class="sec-head"><h2>Files at a glance</h2><span class="count" id="fl-count"></span></div>
+    <div class="card"><table class="files"><tbody id="fl-body"></tbody></table></div>
+  </section>
+
+  <p class="footnote" id="footnote"></p>
+</main>
+
+<button class="dock" id="dock" aria-label="Open questions">💬 Questions<span class="n" id="dock-n">0</span></button>
+
+<aside class="drawer" id="drawer" aria-label="Review questions">
+  <header>
+    <h3>Questions for the author</h3>
+    <button class="x" id="drawer-x" aria-label="Close">×</button>
+  </header>
+  <div class="body" id="drawer-body"></div>
+  <footer>
+    <div class="hint">Export posts these to the PR as <code>@claude</code> comments — an agent answers on the thread.</div>
+    <div class="row">
+      <button id="copy-q" class="primary">Copy as PR comments</button>
+      <button id="dl-q">Download .md</button>
+    </div>
+    <div class="hint">Then: <code>gh pr comment <span id="gh-n">N</span> --body-file pr-questions.md</code> · <a id="open-pr" target="_blank" rel="noopener">open PR ↗</a></div>
+  </footer>
+</aside>
+
+<div class="lightbox" id="lightbox"><img id="lightbox-img" alt="" /></div>
+<div class="toast" id="toast"></div>
+
+<!-- ============================================================= -->
+<!--  REVIEW DATA — the pr-review-page skill replaces this object.  -->
+<!--  Sample values below make the template render standalone.      -->
+<!-- ============================================================= -->
+<script id="review-data">
+const REVIEW = {
+  pr: {
+    number: 42,
+    title: "Add email verification to sign-up",
+    repo: "luiscf1226/agentic-dev-workflow",
+    url: "https://github.com/luiscf1226/agentic-dev-workflow/pull/42",
+    author: "luiscf1226",
+    base: { branch: "master", sha: "a1b2c3d" },
+    head: { branch: "feat/email-verify", sha: "e4f5a6b" },
+    classification: ["backend", "frontend"],   // any of: frontend | backend | change
+    blastRadius: "Medium",                      // Low | Medium | High
+    summary: "New users must confirm their email before the account activates. Adds a verification token column, a POST endpoint to confirm the token, and a banner on the login screen prompting unverified users to check their inbox.",
+    stats: { files: 9, additions: 341, deletions: 52, commits: 4 }
+  },
+  database: [
+    {
+      table: "users", status: "modified", note: "adds email-verification state",
+      columns: [
+        { name: "id", type: "uuid", nullable: false, default: "gen_random_uuid()", status: "unchanged" },
+        { name: "email", type: "text", nullable: false, status: "unchanged" },
+        { name: "email_verified_at", type: "timestamptz", nullable: true, default: "null", status: "added" },
+        { name: "role", type: "text", nullable: false, default: "'member'", status: "changed", was: { type: "text", default: "'user'" } },
+        { name: "legacy_active_flag", type: "boolean", status: "removed" }
+      ]
+    },
+    {
+      table: "verification_tokens", status: "added", note: "one-time email tokens",
+      columns: [
+        { name: "token", type: "text", nullable: false, status: "added" },
+        { name: "user_id", type: "uuid", nullable: false, status: "added" },
+        { name: "expires_at", type: "timestamptz", nullable: false, status: "added" }
+      ]
+    }
+  ],
+  endpoints: [
+    {
+      method: "POST", path: "/api/auth/verify-email", status: "added", auth: "none (token is the credential)",
+      purpose: "Confirms a user's email from a one-time token and activates the account.",
+      request: [ { name: "token", in: "body", type: "string", required: true, note: "one-time token from the email" } ],
+      responses: [
+        { code: "200", shape: "{ ok: true }" },
+        { code: "400", shape: "{ error: 'invalid_or_expired' }" }
+      ]
+    },
+    {
+      method: "POST", path: "/api/auth/resend-verification", status: "added", auth: "session required",
+      purpose: "Re-sends the verification email to the logged-in user.",
+      request: [],
+      responses: [ { code: "202", shape: "{ queued: true }" } ]
+    }
+  ],
+  screens: [
+    {
+      name: "Login screen", route: "/login", note: "Adds an amber 'verify your email' banner for unverified users.",
+      before: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgNDYwIiBmb250LWZhbWlseT0iLWFwcGxlLXN5c3RlbSwgU2Vnb2UgVUksIFJvYm90bywgSGVsdmV0aWNhLCBBcmlhbCwgc2Fucy1zZXJpZiI+CiAgPHJlY3Qgd2lkdGg9IjY0MCIgaGVpZ2h0PSI0NjAiIGZpbGw9IiNmNGY2ZmEiLz4KICA8cmVjdCB4PSIxNDAiIHk9Ijk2IiB3aWR0aD0iMzYwIiBoZWlnaHQ9IjM0NCIgcng9IjE2IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNlNWU3ZWIiLz4KICA8Y2lyY2xlIGN4PSIxNzQiIGN5PSIxMzQiIHI9IjEwIiBmaWxsPSIjMjU2M2ViIi8+CiAgPHRleHQgeD0iMTk0IiB5PSIxMzkiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxMTE4MjciPkFjbWU8L3RleHQ+CiAgPHRleHQgeD0iMTcyIiB5PSIxODgiIGZvbnQtc2l6ZT0iMjIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxMTE4MjciPlNpZ24gaW48L3RleHQ+CiAgPHRleHQgeD0iMTcyIiB5PSIyMTIiIGZvbnQtc2l6ZT0iMTMiIGZpbGw9IiM2YjcyODAiPldlbGNvbWUgYmFjazwvdGV4dD4KICA8dGV4dCB4PSIxNzIiIHk9IjI0NiIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzM3NDE1MSI+RW1haWw8L3RleHQ+CiAgPHJlY3QgeD0iMTcyIiB5PSIyNTQiIHdpZHRoPSIyOTYiIGhlaWdodD0iMzgiIHJ4PSI4IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNkMWQ1ZGIiLz4KICA8dGV4dCB4PSIxODYiIHk9IjI3OCIgZm9udC1zaXplPSIxMyIgZmlsbD0iIzljYTNhZiI+eW91QGNvbXBhbnkuY29tPC90ZXh0PgogIDx0ZXh0IHg9IjE3MiIgeT0iMzIwIiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMzc0MTUxIj5QYXNzd29yZDwvdGV4dD4KICA8cmVjdCB4PSIxNzIiIHk9IjMyOCIgd2lkdGg9IjI5NiIgaGVpZ2h0PSIzOCIgcng9IjgiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2QxZDVkYiIvPgogIDx0ZXh0IHg9IjE4NiIgeT0iMzUyIiBmb250LXNpemU9IjE1IiBmaWxsPSIjMzc0MTUxIiBsZXR0ZXItc3BhY2luZz0iMiI+JiM4MjI2OyYjODIyNjsmIzgyMjY7JiM4MjI2OyYjODIyNjsmIzgyMjY7JiM4MjI2OyYjODIyNjs8L3RleHQ+CiAgPHJlY3QgeD0iMTcyIiB5PSIzODgiIHdpZHRoPSIyOTYiIGhlaWdodD0iNDIiIHJ4PSI4IiBmaWxsPSIjMjU2M2ViIi8+CiAgPHRleHQgeD0iMzIwIiB5PSI0MTQiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiNmZmZmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkxvZyBpbjwvdGV4dD4KPC9zdmc+Cg==",
+      after: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgNDYwIiBmb250LWZhbWlseT0iLWFwcGxlLXN5c3RlbSwgU2Vnb2UgVUksIFJvYm90bywgSGVsdmV0aWNhLCBBcmlhbCwgc2Fucy1zZXJpZiI+CiAgPHJlY3Qgd2lkdGg9IjY0MCIgaGVpZ2h0PSI0NjAiIGZpbGw9IiNmNGY2ZmEiLz4KICA8cmVjdCB4PSI2MCIgeT0iMjgiIHdpZHRoPSI1MjAiIGhlaWdodD0iNDYiIHJ4PSI4IiBmaWxsPSIjZmVmM2M3IiBzdHJva2U9IiNmNTllMGIiLz4KICA8Y2lyY2xlIGN4PSI4OCIgY3k9IjUxIiByPSI5IiBmaWxsPSIjZjU5ZTBiIi8+CiAgPHRleHQgeD0iODgiIHk9IjU2IiBmb250LXNpemU9IjEzIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjZmZmZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj4hPC90ZXh0PgogIDx0ZXh0IHg9IjEwOCIgeT0iNTYiIGZvbnQtc2l6ZT0iMTMiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiM5MjQwMGUiPlZlcmlmeSB5b3VyIGVtYWlsIHRvIGFjdGl2YXRlIHlvdXIgYWNjb3VudC48L3RleHQ+CiAgPHRleHQgeD0iNTEyIiB5PSI1NiIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI2I0NTMwOSIgdGV4dC1hbmNob3I9ImVuZCIgdGV4dC1kZWNvcmF0aW9uPSJ1bmRlcmxpbmUiPlJlc2VuZDwvdGV4dD4KICA8cmVjdCB4PSIxNDAiIHk9Ijk2IiB3aWR0aD0iMzYwIiBoZWlnaHQ9IjM0NCIgcng9IjE2IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNlNWU3ZWIiLz4KICA8Y2lyY2xlIGN4PSIxNzQiIGN5PSIxMzQiIHI9IjEwIiBmaWxsPSIjMjU2M2ViIi8+CiAgPHRleHQgeD0iMTk0IiB5PSIxMzkiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxMTE4MjciPkFjbWU8L3RleHQ+CiAgPHRleHQgeD0iMTcyIiB5PSIxODgiIGZvbnQtc2l6ZT0iMjIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxMTE4MjciPlNpZ24gaW48L3RleHQ+CiAgPHRleHQgeD0iMTcyIiB5PSIyMTIiIGZvbnQtc2l6ZT0iMTMiIGZpbGw9IiM2YjcyODAiPldlbGNvbWUgYmFjazwvdGV4dD4KICA8dGV4dCB4PSIxNzIiIHk9IjI0NiIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzM3NDE1MSI+RW1haWw8L3RleHQ+CiAgPHJlY3QgeD0iMTcyIiB5PSIyNTQiIHdpZHRoPSIyOTYiIGhlaWdodD0iMzgiIHJ4PSI4IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNkMWQ1ZGIiLz4KICA8dGV4dCB4PSIxODYiIHk9IjI3OCIgZm9udC1zaXplPSIxMyIgZmlsbD0iIzljYTNhZiI+eW91QGNvbXBhbnkuY29tPC90ZXh0PgogIDx0ZXh0IHg9IjE3MiIgeT0iMzIwIiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMzc0MTUxIj5QYXNzd29yZDwvdGV4dD4KICA8cmVjdCB4PSIxNzIiIHk9IjMyOCIgd2lkdGg9IjI5NiIgaGVpZ2h0PSIzOCIgcng9IjgiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2QxZDVkYiIvPgogIDx0ZXh0IHg9IjE4NiIgeT0iMzUyIiBmb250LXNpemU9IjE1IiBmaWxsPSIjMzc0MTUxIiBsZXR0ZXItc3BhY2luZz0iMiI+JiM4MjI2OyYjODIyNjsmIzgyMjY7JiM4MjI2OyYjODIyNjsmIzgyMjY7JiM4MjI2OyYjODIyNjs8L3RleHQ+CiAgPHJlY3QgeD0iMTcyIiB5PSIzODgiIHdpZHRoPSIyOTYiIGhlaWdodD0iNDIiIHJ4PSI4IiBmaWxsPSIjMjU2M2ViIi8+CiAgPHRleHQgeD0iMzIwIiB5PSI0MTQiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiNmZmZmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkxvZyBpbjwvdGV4dD4KPC9zdmc+Cg=="
+    }
+  ],
+  files: [
+    { path: "src/db/schema.ts", status: "modified", additions: 28, deletions: 6, kind: "backend" },
+    { path: "src/fn/verify-email.ts", status: "added", additions: 74, deletions: 0, kind: "backend" },
+    { path: "src/routes/login.tsx", status: "modified", additions: 41, deletions: 12, kind: "frontend" }
+  ]
+};
+</script>
+
+<script>
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const el = (t, cls, html) => { const n = document.createElement(t); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+const marker = st => st === "added" ? "+" : st === "removed" ? "−" : st === "changed" ? "~" : "";
+
+const P = REVIEW.pr;
+
+/* ---------- header ---------- */
+$("#repo").textContent = P.repo;
+$("#pr-link").textContent = "#" + P.number;
+$("#pr-link").href = P.url;
+$("#open-pr").href = P.url;
+$("#gh-n").textContent = P.number;
+$("#title").textContent = P.title;
+$("#author").textContent = P.author;
+$("#branches").textContent = `${P.base.branch}@${P.base.sha} ← ${P.head.branch}@${P.head.sha}`;
+document.title = `PR #${P.number} · ${P.title}`;
+
+const badges = $("#badges");
+(P.classification || []).forEach(c => badges.append(el("span", "badge " + c, c[0].toUpperCase() + c.slice(1))));
+if (P.blastRadius) badges.append(el("span", "badge blast-" + P.blastRadius, "Blast radius: " + P.blastRadius));
+$("#summary").textContent = P.summary || "";
+if (P.stats) {
+  const s = P.stats;
+  $("#stats").innerHTML =
+    `<span><b>${s.files}</b> files</span>` +
+    `<span class="add"><b>+${s.additions}</b></span>` +
+    `<span class="rm"><b>−${s.deletions}</b></span>` +
+    `<span><b>${s.commits}</b> commits</span>`;
+}
+$("#footnote").textContent =
+  `Generated review of PR #${P.number}. This page is a review aid, not a merge gate — the no-mistakes gate still governs merge. Screenshots are real captures at ${P.base.sha} (base) and ${P.head.sha} (head).`;
+
+/* ---------- questions store ---------- */
+const QKEY = "pr-review-questions-" + P.repo + "-" + P.number;
+let questions = [];
+try { questions = JSON.parse(localStorage.getItem(QKEY) || "[]"); } catch {}
+const saveQ = () => { try { localStorage.setItem(QKEY, JSON.stringify(questions)); } catch {} refreshQ(); };
+const addQ = (anchor, text) => { questions.push({ anchor, text, id: anchor + ":" + questions.length + ":" + text.length }); saveQ(); };
+const removeQ = id => { questions = questions.filter(q => q.id !== id); saveQ(); };
+
+/* ---------- ask affordance builder ---------- */
+function askBlock(anchorLabel) {
+  const wrap = el("div");
+  const btn = el("button", "ask-btn", `💬 Ask <span class="n"></span>`);
+  const composer = el("div", "composer");
+  const ta = el("textarea"); ta.placeholder = "Ask the author a question about this…";
+  ta.setAttribute("aria-label", "Question about " + anchorLabel); ta.name = "q";
+  const add = el("button", "add-q", "Add");
+  composer.append(ta, add);
+  const list = el("ul", "qlist");
+  btn.onclick = () => { composer.classList.toggle("open"); if (composer.classList.contains("open")) ta.focus(); };
+  add.onclick = () => { const v = ta.value.trim(); if (!v) return; addQ(anchorLabel, v); ta.value = ""; };
+  ta.addEventListener("keydown", e => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") add.onclick(); });
+  wrap._render = () => {
+    const mine = questions.filter(q => q.anchor === anchorLabel);
+    btn.querySelector(".n").textContent = mine.length ? mine.length : "";
+    list.innerHTML = "";
+    mine.forEach(q => {
+      const li = el("li", null, `<span>${esc(q.text)}</span>`);
+      const rm = el("button", "rmq", "×"); rm.onclick = () => removeQ(q.id); li.append(rm); list.append(li);
+    });
+  };
+  wrap.append(composer, list);
+  wrap._render();
+  ANCHOR_RENDERERS.push(wrap._render);
+  return { btn, wrap };
+}
+const ANCHOR_RENDERERS = [];
+
+/* ---------- render: database ---------- */
+if ((REVIEW.database || []).length) {
+  $("#sec-db").hidden = false;
+  $("#db-count").textContent = REVIEW.database.length + " table" + (REVIEW.database.length > 1 ? "s" : "");
+  const body = $("#db-body");
+  REVIEW.database.forEach(t => {
+    const card = el("div", "card");
+    const head = el("div", "card-head");
+    head.append(el("span", "path", esc(t.table)), el("span", "pill " + t.status, t.status));
+    const anchor = `Table: ${t.table}`;
+    const ask = askBlock(anchor);
+    head.append(ask.btn);
+    card.append(head);
+    if (t.note) card.append(el("p", "note", esc(t.note)));
+    const scroll = el("div", "table-scroll");
+    const table = el("table", "schema");
+    table.innerHTML = `<thead><tr><th></th><th>Column</th><th>Type</th><th>Null</th><th>Default</th></tr></thead>`;
+    const tb = el("tbody");
+    (t.columns || []).forEach(c => {
+      const rowCls = c.status && c.status !== "unchanged" ? "row-" + c.status : "";
+      const tr = el("tr", rowCls);
+      const nullTxt = c.nullable === false ? "NOT NULL" : c.nullable === true ? "null ok" : "—";
+      let dflt = c.default != null ? `<code>${esc(c.default)}</code>` : "—";
+      if (c.status === "changed" && c.was) {
+        const wasType = c.was.type && c.was.type !== c.type ? `<div class="was">was ${esc(c.was.type)}</div>` : "";
+        const wasDef = c.was.default != null && c.was.default !== c.default ? `<div class="was">was ${esc(c.was.default)}</div>` : "";
+        tr.innerHTML =
+          `<td><span class="marker changed">~</span></td><td class="col-name">${esc(c.name)}</td>` +
+          `<td>${esc(c.type || "")}${wasType}</td><td>${nullTxt}</td><td>${dflt}${wasDef}</td>`;
+      } else {
+        tr.innerHTML =
+          `<td><span class="marker ${c.status||''}">${marker(c.status)}</span></td>` +
+          `<td class="col-name">${esc(c.name)}</td><td>${esc(c.type || "")}</td><td>${nullTxt}</td><td>${dflt}</td>`;
+      }
+      tb.append(tr);
+    });
+    table.append(tb); scroll.append(table); card.append(scroll, ask.wrap);
+    body.append(card);
+  });
+}
+
+/* ---------- render: endpoints ---------- */
+if ((REVIEW.endpoints || []).length) {
+  $("#sec-ep").hidden = false;
+  $("#ep-count").textContent = REVIEW.endpoints.length + " endpoint" + (REVIEW.endpoints.length > 1 ? "s" : "");
+  const body = $("#ep-body");
+  REVIEW.endpoints.forEach(e => {
+    const card = el("div", "card");
+    const head = el("div", "card-head");
+    head.append(el("span", "method " + e.method, e.method), el("span", "path", esc(e.path)));
+    if (e.status) head.append(el("span", "pill " + e.status, e.status));
+    const anchor = `${e.method} ${e.path}`;
+    const ask = askBlock(anchor);
+    head.append(ask.btn);
+    card.append(head);
+    if (e.purpose) card.append(el("p", "note", esc(e.purpose)));
+    if (e.auth) { const kv = el("dl", "kv"); kv.innerHTML = `<dt>Auth</dt><dd>${esc(e.auth)}</dd>`; card.append(kv); }
+    if ((e.request || []).length) {
+      card.append(el("div", "subhead", "Request"));
+      const ul = el("ul", "params");
+      e.request.forEach(p => ul.append(el("li", null,
+        `<span class="pname">${esc(p.name)}</span> <span class="was">${esc(p.in||"")}</span> ${esc(p.type||"")} ${p.required ? '<span class="req">required</span>' : ""}${p.note ? ` — ${esc(p.note)}` : ""}`)));
+      card.append(ul);
+    }
+    if ((e.responses || []).length) {
+      card.append(el("div", "subhead", "Responses"));
+      e.responses.forEach(r => {
+        const row = el("div", "resp");
+        row.append(el("span", "code-badge", esc(r.code)));
+        if (r.shape) { const pre = el("pre", "shape", esc(r.shape)); row.style.flexDirection = "column"; row.append(pre); }
+        card.append(row);
+      });
+    }
+    card.append(ask.wrap);
+    body.append(card);
+  });
+}
+
+/* ---------- render: screens ---------- */
+if ((REVIEW.screens || []).length) {
+  $("#sec-screens").hidden = false;
+  $("#sc-count").textContent = REVIEW.screens.length + " screen" + (REVIEW.screens.length > 1 ? "s" : "");
+  const body = $("#sc-body");
+  REVIEW.screens.forEach(s => {
+    const card = el("div", "card");
+    const head = el("div", "card-head");
+    head.append(el("span", "path", esc(s.name)));
+    if (s.route) head.append(el("span", "note", esc(s.route)));
+    const anchor = `Screen: ${s.name}${s.route ? " (" + s.route + ")" : ""}`;
+    const ask = askBlock(anchor);
+    head.append(ask.btn);
+    card.append(head);
+    if (s.note) card.append(el("p", "note", esc(s.note)));
+    const ba = el("div", "ba");
+    const side = (label, src, cls) => {
+      const fig = el("figure", cls);
+      fig.append(el("figcaption", null, `<span class="tag">${label}</span><span>${label === "Before" ? esc(P.base.sha) : esc(P.head.sha)}</span>`));
+      if (src) { const img = el("img"); img.src = src; img.alt = `${s.name} — ${label}`; img.onclick = () => openLightbox(src); fig.append(img); }
+      else fig.append(el("div", "noimg", label === "Before" && s.after ? "New screen — no before" : "No screenshot captured"));
+      return fig;
+    };
+    ba.append(side("Before", s.before, "before"), side("After", s.after, "after"));
+    card.append(ba, ask.wrap);
+    body.append(card);
+  });
+}
+
+/* ---------- render: files ---------- */
+if ((REVIEW.files || []).length) {
+  $("#sec-files").hidden = false;
+  $("#fl-count").textContent = REVIEW.files.length + " files";
+  const tb = $("#fl-body");
+  REVIEW.files.forEach(f => {
+    const tr = el("tr");
+    tr.innerHTML =
+      `<td>${esc(f.path)}</td>` +
+      `<td><span class="pill ${f.status}">${esc(f.status)}</span></td>` +
+      `<td class="num add">${f.additions != null ? "+" + f.additions : ""}</td>` +
+      `<td class="num rm">${f.deletions != null ? "−" + f.deletions : ""}</td>`;
+    tb.append(tr);
+  });
+}
+
+/* ---------- questions drawer ---------- */
+const drawer = $("#drawer"), dock = $("#dock");
+dock.onclick = () => drawer.classList.add("open");
+$("#drawer-x").onclick = () => drawer.classList.remove("open");
+
+function buildExport() {
+  if (!questions.length) return "";
+  const groups = {};
+  questions.forEach(q => (groups[q.anchor] ||= []).push(q.text));
+  let out = `Review questions on PR #${P.number} — please answer inline.\n\n`;
+  Object.entries(groups).forEach(([anchor, qs]) => {
+    out += `**${anchor}**\n`;
+    qs.forEach(t => out += `- @claude ${t}\n`);
+    out += `\n`;
+  });
+  return out.trim() + "\n";
+}
+
+function refreshQ() {
+  const n = questions.length;
+  $("#dock-n").textContent = n;
+  const body = $("#drawer-body");
+  body.innerHTML = "";
+  if (!n) { body.append(el("div", "empty", "No questions yet.<br>Hit “💬 Ask” on any table, endpoint, or screen.")); }
+  else {
+    const groups = {};
+    questions.forEach(q => (groups[q.anchor] ||= []).push(q));
+    Object.entries(groups).forEach(([anchor, qs]) => {
+      const g = el("div", "qgroup");
+      g.append(el("div", "anchor", esc(anchor)));
+      qs.forEach(q => {
+        const qd = el("div", "q", `<span>${esc(q.text)}</span>`);
+        const rm = el("button", "rmq", "×"); rm.onclick = () => removeQ(q.id); qd.append(rm); g.append(qd);
+      });
+      body.append(g);
+    });
+  }
+  ANCHOR_RENDERERS.forEach(fn => fn());
+}
+
+$("#copy-q").onclick = async () => {
+  const txt = buildExport();
+  if (!txt) return toast("No questions to copy");
+  try { await navigator.clipboard.writeText(txt); toast("Copied — paste on the PR, or use the gh command"); }
+  catch { toast("Copy failed — use Download instead"); }
+};
+$("#dl-q").onclick = () => {
+  const txt = buildExport();
+  if (!txt) return toast("No questions to download");
+  const blob = new Blob([txt], { type: "text/markdown" });
+  const a = el("a"); a.href = URL.createObjectURL(blob); a.download = "pr-questions.md"; a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+let toastTimer;
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 2600); }
+
+/* ---------- lightbox ---------- */
+const lb = $("#lightbox"), lbImg = $("#lightbox-img");
+function openLightbox(src) { lbImg.src = src; lb.classList.add("open"); }
+lb.onclick = () => lb.classList.remove("open");
+document.addEventListener("keydown", e => { if (e.key === "Escape") { lb.classList.remove("open"); drawer.classList.remove("open"); } });
+
+refreshQ();
+</script>
+</body>
+</html>

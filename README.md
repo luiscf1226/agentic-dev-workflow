@@ -83,7 +83,9 @@ switch**, `handoff` runs the test gate first (never hands off broken work), then
 `templates/pr-review.html` — a **code-free, interactive review** that classifies the PR (frontend /
 backend / change), renders **DB model changes as tables**, **new endpoints as cards**, and **real
 before/after screenshots** (captured at base vs head). Reviewers ask questions in-page; **export** posts
-them to the PR as `@claude` comments and an agent answers on the thread (`address-pr-comments`).
+them to the PR as `@claude` comments and an agent answers on the thread (`address-pr-comments`). See a
+full rendered example — every section populated, screenshots embedded — at
+[`examples/pr-review.example.html`](examples/pr-review.example.html) (open the raw file in a browser).
 
 **Typical run:** `problem → spec → phases → issues → design → plan-parallelize → execute-plan`, closing
 with `pr-no-mistakes` per PR. **Single task:** `plan-parallelize --single → execute-plan → pr-no-mistakes`.
