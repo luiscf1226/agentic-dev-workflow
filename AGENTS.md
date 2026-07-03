@@ -8,6 +8,8 @@ The intended order is
 `problem → spec → phases → issues → design → plan-parallelize → execute-plan → pr-no-mistakes`,
 but each is independent — run any subset. `handoff` is a cross-cutting rescue: invoke it from inside
 `execute-plan` when a session hits a bad approach, lost context, or a deliberate session switch.
+`pr-review-page` is a post-PR companion: after a PR is open, it produces a self-contained interactive
+HTML review (summary, DB tables, endpoints, before/after screenshots) reviewers read instead of the diff.
 
 ## Non-negotiables (apply to every skill)
 1. **Surface assumptions before building.** If requirements conflict, stop and ask.
