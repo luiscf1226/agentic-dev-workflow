@@ -17,13 +17,18 @@ that supports the standard. No step depends on another; pick what you need.
 | 7 | `execute-plan` | Executes one approved sub-plan — auto-detects **create / modify / fix / test**, leaves evidence, keeps the baton current |
 | 8 | `pr-no-mistakes` | Runs the no-mistakes gate; PR description carries **screenshot (if UI) + scope + system impact** |
 
-Plus three companions:
+Plus companions (independent of the 8-step core — run any time):
 - `install` — drops the whole library into whatever harness you're running.
 - `handoff` — a cross-cutting rescue that verifies and writes a resumable **baton** so an in-flight task
   can move to a fresh session on a bad approach, lost context, or session switch.
 - `pr-review-page` — turns an open PR into a single self-contained interactive HTML review (plain-language
   summary, **DB model changes as tables**, **endpoints as cards**, **before/after screenshots**) that
   reviewers read *instead of the diff*, leaving questions in-page that export as `@claude` PR comments.
+- `improve-ui-ux` — audit + improve UI/UX (modern patterns, before/after examples, responsiveness, a11y first).
+- `security-audit` — adversarial audit of APIs, DB, JWT/roles with try-to-break scenarios (local/staging only).
+- `create-test-plan-demo` — step-by-step demo/QA test plan as Markdown under `docs/test-plans/`.
+- `create-video` — Playwright demo video with a visible fake cursor + click ripple (`demoClick` / `demoFill`).
+- `add-logger-watchdog` — structured logger (`info` / `security` / `error` / `warning`) + superadmin watchdog.
 
 ## Install
 
@@ -42,7 +47,9 @@ skills into the right folder:
 
 ### Option B — let the agent do it
 Ask your agent: *"install the agentic dev workflow skills."* The `install` skill detects the harness,
-copies the seven skills, and verifies them. This is the portable path for harnesses without a shell.
+copies all skills (core + companions), and verifies them. This is the portable path for harnesses without a shell.
+
+After `git pull`, refresh a global Claude install with `./install.sh -g` (see [INSTALL.md](INSTALL.md)).
 
 ### Option C — copy by hand
 ```bash
