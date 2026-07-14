@@ -11,6 +11,11 @@ but each is independent — run any subset. `handoff` is a cross-cutting rescue:
 `pr-review-page` is a post-PR companion: after a PR is open, it produces a self-contained interactive
 HTML review (summary, DB tables, endpoints, before/after screenshots) reviewers read instead of the diff.
 
+Five more companions are also independent (not part of the core 8-step order) — load any of them when
+the task matches:
+`improve-ui-ux`, `security-audit`, `create-test-plan-demo`, `create-video`, `add-logger-watchdog`.
+After `git pull`, refresh installed copies with `./install.sh -g` (or project-scoped `./install.sh`).
+
 ## Non-negotiables (apply to every skill)
 1. **Surface assumptions before building.** If requirements conflict, stop and ask.
 2. **Touch only what you're asked.** No drive-by refactors.

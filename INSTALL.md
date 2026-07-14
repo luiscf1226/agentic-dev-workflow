@@ -81,9 +81,27 @@ You should see the skills here:
 - **Claude Code (global):** `~/.claude/skills/` (Windows: `%USERPROFILE%\.claude\skills\`)
 - **Project:** `.claude/skills/` (or `.codex/skills/`)
 
-There should be 8 folders: `problem`, `spec`, `phases`, `issues`, `design`,
-`plan-parallelize`, `pr-no-mistakes`, `install`.
+There should be folders for the **core workflow** plus **companions**:
+
+| Group | Skills |
+|-------|--------|
+| Core (8) | `problem`, `spec`, `phases`, `issues`, `design`, `plan-parallelize`, `execute-plan`, `pr-no-mistakes` |
+| Companions | `install`, `handoff`, `pr-review-page`, `improve-ui-ux`, `security-audit`, `create-test-plan-demo`, `create-video`, `add-logger-watchdog` |
 
 In Claude Code, type `/problem` — if it's recognized, you're done. 🎉
+Also try a companion such as `/improve-ui-ux` or `/security-audit`.
+
+---
+
+## Update after git pull
+
+When this repo gains new skills (or skill fixes), refresh your installed copies:
+
+```bash
+git pull origin master && ./install.sh -g
+```
+
+Use `./install.sh` (no `-g`) if you only install project-scoped. Then restart Claude Code
+(or reopen the session) so new slash commands appear.
 
 Next: see [How to use](README.md#how-to-use) in the README.
