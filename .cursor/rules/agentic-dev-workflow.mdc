@@ -1,0 +1,37 @@
+---
+description: How to work on the Agentic Dev Workflow skill library, and how to load its skills
+alwaysApply: true
+---
+
+# Agentic Dev Workflow — Cursor rules
+
+## Skills are available here
+This repo's skills are exposed to Cursor at `.cursor/skills/` (a **symlink to `skills/`**).
+Load `skills/<name>/SKILL.md` when a task matches its `description:`, and follow it.
+`AGENTS.md` is the router — read it to pick the right skill. `constitution.md` holds the rules
+every skill inherits.
+
+**Start with `orient`** on any repo whose `.agentic/project.md` is missing or stale. It writes the
+shared project map (stack, verified commands, conventions, roles, risk areas) that the other skills
+read instead of re-deriving the stack per person.
+
+## When editing this repo
+It is a **documentation library, not an application** — no build, no test suite, no CI.
+Never claim tests pass; there are none to run.
+
+- Edit `skills/<name>/SKILL.md` **directly**. `.cursor/skills`, `.claude/skills`, and `.codex/skills`
+  are symlinks to the same folder — never edit through a symlink path.
+- Frontmatter `name:` must equal the directory name, or the skill won't load.
+- A skill's `description:` is its routing signal — it must carry the phrases a user would type.
+- New skill → also register it in `AGENTS.md`, `README.md`, and the table in
+  `skills/install/SKILL.md`, or it stays invisible to some harness.
+- Any `templates/<file>` a skill references must actually exist.
+- `.gitignore` entries must be root-anchored (`/phases.md`, not `phases.md`) — a bare name matches
+  at any depth and silently drops `templates/phases.md`.
+
+## Non-negotiables
+1. Touch only what you were asked to. No drive-by refactors.
+2. Leave evidence — a task isn't done without proof.
+3. Never invent a project command; verify it or mark it `UNVERIFIED`.
+4. Keep PRs small, one concern per branch, cut from an up-to-date trunk.
+5. Agents open PRs; **humans merge**.
