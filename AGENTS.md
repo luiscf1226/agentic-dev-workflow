@@ -3,6 +3,12 @@
 Skills live in `skills/`. Each is a self-contained folder with a `SKILL.md`.
 Load the one whose description matches the task; ignore the rest.
 
+**Working on this repo itself?** Run `./setup.sh` once after cloning. It wires
+`.claude/skills`, `.cursor/skills`, and `.codex/skills` to `skills/` so all three harnesses see one
+source, then verifies every skill. This repo is a **documentation library — no build, no test suite,
+no CI**; never claim tests pass. Edit `skills/<name>/SKILL.md` directly, never through a harness
+symlink path. Full notes: `CLAUDE.md`.
+
 To make these skills available in this harness, load `skills/install/SKILL.md` (or run `./install.sh`).
 
 **Always start with `orient`** if `.agentic/project.md` is missing or stale. It maps the repo (stack,

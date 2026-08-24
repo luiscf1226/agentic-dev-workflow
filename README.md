@@ -68,6 +68,10 @@ Plus companions (independent of the 8-step core — run any time):
 
 👉 New here? See the **[easy install guide](INSTALL.md)** for copy-paste steps (Claude Code, Codex, Windows).
 
+> **Contributing to this repo** (rather than installing it elsewhere)? Run `./setup.sh` once after
+> cloning — it wires Claude Code, Cursor, and Codex to `skills/` and verifies the library. See
+> [Developing this repo](#developing-this-repo).
+
 ### Option A — auto-install script (any harness)
 The script detects your harness (`.claude`, `.github`, `.cursor`, `.codex`, `.gemini`) and copies the
 skills into the right folder:
@@ -137,6 +141,27 @@ with `pr-no-mistakes` per PR. **Single task:** `plan-parallelize --single → ex
 backlog into 1-5 tracks, then each agent runs `run-batch` on its own track to churn through every issue
 in it unattended.
 Every step inherits the rules in `constitution.md` — scope discipline, evidence before "done", small PRs.
+
+## Developing this repo
+Working **on** the library (not installing it into another project):
+
+```bash
+./setup.sh              # wire all three harnesses + verify
+SETUP_MODE=copy ./setup.sh   # force copies (Windows without symlink support)
+```
+
+| Harness | Reads | Skills at |
+|---------|-------|-----------|
+| Claude Code CLI | `CLAUDE.md` | `.claude/skills` |
+| Cursor | `.cursor/rules/agentic-dev-workflow.mdc` | `.cursor/skills` |
+| Codex | `AGENTS.md` | `.codex/skills` |
+
+Those three skills dirs are **symlinks to `skills/`** — one source of truth, edits are live with no
+copy step. They're generated and gitignored, so run `./setup.sh` after cloning. On platforms without
+symlinks the script copies instead and tells you to re-run it after editing `skills/`.
+
+This repo is documentation — **no build, no test suite, no CI**. `./setup.sh` runs the only checks
+there are: frontmatter `name:` matches each directory, and every referenced `templates/` file exists.
 
 ## External skills it leans on
 Referenced by these skills but **not shipped here** — install separately, or skip that step.
