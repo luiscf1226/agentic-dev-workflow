@@ -5,6 +5,28 @@ Each step is its own skill in the open [Agent Skills](https://agentskills.io) fo
 run **one, several, or all** of them — with Claude Code, Codex, Cursor, Gemini CLI, or any harness
 that supports the standard. No step depends on another; pick what you need.
 
+## Start here (new teammate)
+1. Install the skills into your harness — `./install.sh` (see [Install](#install)).
+2. **Run `orient`.** It maps the repo into `.agentic/project.md`: stack, *verified* commands, layout,
+   conventions, roles, risk areas. Every other skill reads that file instead of guessing, so you and
+   your teammates work from the same picture. Commit it — it's a team artifact.
+3. Then pick your path:
+
+| Your situation | Path |
+|---|---|
+| **Existing project**, need to understand it | `orient` — that's the whole job |
+| **Existing project**, one task | `orient` → `plan-parallelize --single` → `execute-plan` → `pr-no-mistakes` |
+| **Existing project**, a backlog | `orient` → `plan-parallelize` → `run-batch` per agent |
+| **Existing project**, a pass over quality | `orient` → `security-audit` / `improve-ui-ux` |
+| **New project**, from nothing | `problem` → `spec` → `phases` → `issues` → `design` → `orient` → build |
+
+Nothing is coupled — jump to whichever skill matches the task.
+
+## Entry skill
+| Step | Skill | What it does |
+|------|-------|--------------|
+| 0 | `orient` | Maps an existing/new repo into `.agentic/project.md` — the shared team baseline |
+
 ## The 8 skills
 | Step | Skill | What it does |
 |------|-------|--------------|
@@ -18,6 +40,9 @@ that supports the standard. No step depends on another; pick what you need.
 | 8 | `pr-no-mistakes` | Runs the no-mistakes gate; PR description carries **screenshot (if UI) + scope + system impact** |
 
 Plus companions (independent of the 8-step core — run any time):
+- `run-batch` — hands one agent an ordered batch of issues and loops `plan-parallelize --single →
+  execute-plan → pr-no-mistakes` per issue without stopping between them. Pair with step 6's waves to run
+  1-5 agents (any harness — Claude Code, Cursor, Codex) each churning through their own track unattended.
 - `install` — drops the whole library into whatever harness you're running.
 - `handoff` — a cross-cutting rescue that verifies and writes a resumable **baton** so an in-flight task
   can move to a fresh session on a bad approach, lost context, or session switch.
@@ -29,6 +54,15 @@ Plus companions (independent of the 8-step core — run any time):
 - `create-test-plan-demo` — step-by-step demo/QA test plan as Markdown under `docs/test-plans/`.
 - `create-video` — Playwright demo video with a visible fake cursor + click ripple (`demoClick` / `demoFill`).
 - `add-logger-watchdog` — structured logger (`info` / `security` / `error` / `warning`) + superadmin watchdog.
+
+## Working as a team
+- **Same version for everyone.** After `git pull`, re-run `./install.sh -g`. Teammates on stale skills
+  produce inconsistent output against a shared project map.
+- **Commit `.agentic/project.md`.** It's the shared baseline; if you find it wrong, fix it in your PR.
+- **Parallel work is assigned, not improvised.** `plan-parallelize` computes file overlap and gives each
+  agent/teammate a track with owned files. Two people editing the same file in two worktrees is the
+  failure mode this library exists to prevent.
+- **Agents open PRs; humans merge.** No exceptions (`constitution.md`).
 
 ## Install
 
@@ -62,6 +96,11 @@ cp -R skills/. ~/.claude/skills/      # global, all projects
 ## How to use
 Run the steps in order, or jump to whichever one you need — nothing is coupled.
 
+0. **`orient`** — **run this first on any repo you haven't mapped.** Reads the codebase, *verifies* the
+   install/build/test commands actually work, and writes `.agentic/project.md` (stack, layout,
+   conventions, exact role names, risk areas, and an explicit `UNVERIFIED` list). Read-only apart from
+   that one file. On an existing project this is the entry point; on a new one, run it once the skeleton
+   exists so later steps inherit the conventions.
 1. **`problem`** — describe what you want. The skill interrogates scope until you *explicitly* agree,
    then writes `problem.md` + a Mermaid concept graph. No code happens here.
 2. **`spec`** — turns the agreed problem into one source-of-truth `spec.md` (functional + technical).
@@ -94,16 +133,26 @@ them to the PR as `@claude` comments and an agent answers on the thread (`addres
 
 **Typical run:** `problem → spec → phases → issues → design → plan-parallelize → execute-plan`, closing
 with `pr-no-mistakes` per PR. **Single task:** `plan-parallelize --single → execute-plan → pr-no-mistakes`.
-**Quick patch:** skip straight to `pr-no-mistakes`.
+**Quick patch:** skip straight to `pr-no-mistakes`. **Batch across agents:** `plan-parallelize` splits the
+backlog into 1-5 tracks, then each agent runs `run-batch` on its own track to churn through every issue
+in it unattended.
 Every step inherits the rules in `constitution.md` — scope discipline, evidence before "done", small PRs.
 
 ## External skills it leans on
+Referenced by these skills but **not shipped here** — install separately, or skip that step.
 - **lavish-axi** — interactive HTML plans you can annotate. `npx skills add kunchenguid/lavish-axi --skill lavish`
-- **no-mistakes** — the PR validation gate. `npx skills add kunchenguid/no-mistakes` *(confirm exact skill name on its page)*
+- **no-mistakes** — the PR validation gate used by `pr-no-mistakes`. `npx skills add kunchenguid/no-mistakes` *(confirm exact skill name on its page)*
+- **address-pr-comments** — answers the `@claude` questions `pr-review-page` exports.
+- **run** — launches the app so `pr-review-page` can capture before/after screenshots.
 
 ## Design choices
 - **No merge queue.** Keep PRs small and scoped; the `no-mistakes` gate makes each one safe on its own.
 - **Scope discipline.** Every skill enforces "touch only what you're asked."
 - **Evidence is the exit step.** Nothing is done without proof.
+- **One shared project map.** `orient` writes `.agentic/project.md` once; skills read it instead of
+  re-deriving the stack per person, per run. Same repo → same picture, whoever is driving.
+- **Never invent a command.** Project commands are verified or marked `UNVERIFIED` — a fabricated test
+  command that "passes" is worse than no evidence.
+- **Works on inherited code.** Every skill has an existing-project path, not just a greenfield one.
 
 See `constitution.md` for the shared rules every skill inherits.

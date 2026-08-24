@@ -11,6 +11,9 @@ After `plan-parallelize` (single mode, or one wave-item) has produced an approve
 before `pr-no-mistakes`. One issue at a time.
 
 ## Procedure
+0. **Read `.agentic/project.md`** for this repo's verified test/lint/run commands and conventions.
+   Never invent a test command — a fabricated command that "passes" is worse than no evidence.
+   If the map is missing, run `orient` first.
 1. **Detect the task-type** from the issue/baton — do not ask the human to label it:
    - **create** — new feature/file/module → build it from the spec.
    - **modify** — change existing behavior → locate the surface, change only what's in scope.

@@ -10,7 +10,11 @@ license: MIT
 After `spec`, before `issues` and `plan-parallelize`.
 
 ## Procedure
-1. Derive phases from the spec. For each: goal, deliverables, depends-on, blocks, parallel-safe-with, exit criteria.
+1. Derive phases from the spec. For each: goal, deliverables, depends-on, blocks, parallel-safe-with,
+   **files/modules touched**, exit criteria. The files list is what lets `plan-parallelize` detect
+   conflicts — a phase with no edit surface named cannot be safely parallelized.
+   On an existing project, cross-check against the risk areas in `.agentic/project.md`: anything listed
+   there is never `parallel-safe-with` another phase.
 2. Render the dependency graph (Mermaid) and a wave table (what runs concurrently).
 3. Write it to `phases.md` (template in `templates/phases.md`).
 

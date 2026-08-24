@@ -9,8 +9,13 @@ license: MIT
 ## When to use
 First, before `spec`. Never write code from here.
 
+**Existing project:** read `.agentic/project.md` (from `orient`) before asking anything. The problem is a
+*change to a system that already exists* — its current behaviour, constraints, and roles are context you
+must not re-ask the human for. If that map is missing, run `orient` first.
+
 ## Procedure
 1. Ask sharp questions, one cluster at a time, until audience, goal, constraints, and non-goals are clear.
+   On an existing project, also pin down what must **not** change (current behaviour others depend on).
 2. Reflect the problem back. **Do not proceed until the user explicitly says it's correct.**
 3. Emit the outputs below.
 

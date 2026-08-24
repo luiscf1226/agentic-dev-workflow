@@ -11,8 +11,9 @@ When the user needs a demo script, QA walkthrough, or stakeholder test plan for
 a feature, flow, or product surface — not automated test code.
 
 ## Procedure
-1. **Discover the product under test.** Identify the app entrypoint, main
-   personas/roles, and critical flows. Note environment needs (env vars, seed
+1. **Discover the product under test.** Start from `.agentic/project.md` (from `orient`) for the app
+   entrypoint, run command, roles, and env needs — only investigate what the map
+   doesn't cover. Then identify the main personas/roles and critical flows. Note environment needs (env vars, seed
    data, test users, services). Prefer real routes/screens/API names from the
    codebase — do not invent URLs. If no feature was named, infer the primary
    user-facing flow and confirm the title in the plan header.

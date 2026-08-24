@@ -10,6 +10,8 @@ license: MIT
 For any feature with a user interface.
 
 ## Procedure
+0. **Existing project:** read `.agentic/project.md` for the design tokens / theme location and use the
+   system that's already there. Extending an existing design system beats inventing a second one.
 1. From the spec, produce FULL screens for each state (not wireframes).
 2. Derive or reuse a design system: palette, type, spacing, components.
 3. Export `design-tokens.json`. If a brand/design system already exists, match it.

@@ -17,8 +17,10 @@ covering APIs, DB access, auth/JWT/roles, and attempt-to-break scenarios.
 - `full` — all of the above plus try-to-break scenarios
 
 ## Procedure
-1. **Map the attack surface.** Detect stack (framework, ORM, auth library, API
-   style). Inventory public and authenticated routes, auth middleware and role
+1. **Map the attack surface.** Start from `.agentic/project.md` (from `orient`) — it already names the
+   stack, the auth mechanism, and the **exact role names**; getting those wrong
+   invalidates the audit. Only investigate what the map doesn't cover. Otherwise
+   detect stack (framework, ORM, auth library, API style). Inventory public and authenticated routes, auth middleware and role
    checks, DB models / migrations / RLS, JWT or session creation/verification,
    file uploads, webhooks, and admin tools. Sketch a short threat map:
    unauthenticated → authenticated user → privileged role → admin/superadmin.

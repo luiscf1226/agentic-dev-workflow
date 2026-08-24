@@ -16,8 +16,9 @@ superadmin watchdog dashboard / API.
 - `full` — both
 
 ## Procedure
-1. **Discover.** Find existing logger, APM, or audit tables; how
-   `superadmin` / `admin` is represented; where requests enter (middleware, API
+1. **Discover.** Start from `.agentic/project.md` (from `orient`) — it names the **exact** role strings
+   (`superadmin` vs `admin` matters here) and the stack. Then find existing
+   logger, APM, or audit tables; how the privileged role is represented; where requests enter (middleware, API
    gateway, controllers); and PII/secret fields that must never be logged.
    Prefer extending what exists over introducing a second logging stack.
 2. **Logger — levels and events** (when scope includes `logger` / `full`).

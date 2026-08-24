@@ -10,7 +10,9 @@ license: MIT
 After `phases`.
 
 ## Procedure
-1. For each task create an issue: title, body, acceptance criteria, and `blockedBy` links.
+1. For each task create an issue: title, body, acceptance criteria, **expected files/modules touched**,
+   and `blockedBy` links. Carry the files list through from `phases.md` — `plan-parallelize` needs it to
+   assign non-conflicting tracks.
 2. Label by phase; create a milestone per phase.
 3. Prefer the `gh` CLI for portability; use the GitHub MCP if available.
 
