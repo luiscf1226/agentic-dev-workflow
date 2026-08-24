@@ -12,9 +12,11 @@ improve usability — for a page, component, route, or the highest-traffic surfa
 you can identify.
 
 ## Procedure
-1. **Discover the surface.** Identify the stack (React, Next.js, Vue, Svelte,
-   plain HTML/CSS, etc.), design tokens / theme files, shared layouts, and global
-   CSS. If the user named a page or component, start there; otherwise scan main
+1. **Discover the surface.** Start from `.agentic/project.md` (from `orient`) for the stack, design
+   tokens / theme location, and conventions — only investigate what the map
+   doesn't cover, and update the map if you find it wrong. Otherwise identify the
+   stack (React, Next.js, Vue, Svelte, plain HTML/CSS, etc.), design tokens /
+   theme files, shared layouts, and global CSS. If the user named a page or component, start there; otherwise scan main
    user-facing routes and list the worst offenders. Match existing patterns —
    do not invent a parallel design system.
 2. **Audit before editing.** Produce a short severity-ranked audit covering:

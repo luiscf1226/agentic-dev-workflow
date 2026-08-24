@@ -16,10 +16,19 @@ After `issues`, before building. Scales from 1 to many issues.
    the steps below for many issues.
 1. **Master plan (human reviews this one):** order issues into dependency-driven waves with a concurrency
    cap (default 4 worktrees). Output it as a plan the human approves.
+   **Compute the file-overlap map first — do not assign tracks by feel.** Take each issue's
+   files/modules (from the issue body / `phases.md`) plus the risk areas in `.agentic/project.md`, then:
+   - two issues sharing any file go in the **same** track, ordered — never in parallel tracks;
+   - anything listed as a risk area is treated as shared by default;
+   - an issue with no declared edit surface is not parallelizable until someone declares it.
+   Show the owned-files column per track in the master plan so the human can sanity-check the split.
 2. **Sub-plans (auto-governed):** for each issue write a sub-plan using `templates/sub-plan.md`
    (goal, files in scope, out of scope, approach, depends-on, test plan, evidence). A reviewer agent
    approves each against `constitution.md`; the human only sees exceptions (see constitution escalation rules).
-3. **Execute in bounded waves.** Never spawn the whole backlog. One worktree per track; respect file locks.
+3. **Execute in bounded waves.** Never spawn the whole backlog. One worktree per track (1-5 agents —
+   e.g. one per harness: Claude Code, Cursor, Codex); respect file locks. Hand each track's ordered issue
+   list to `run-batch` so that agent loops the whole track to completion instead of stopping after one
+   issue.
 4. **Optional — Lavish plan (ON REQUEST ONLY, never automatic):** when the user asks, promote a chosen
    issue (or the master plan) into an interactive Lavish plan for hands-on annotation:
    `npx lavish-axi <plan>.html`. Do not do this unless explicitly asked.

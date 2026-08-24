@@ -10,7 +10,11 @@ license: MIT
 The final step, on a committed feature branch, before the PR reaches main.
 
 ## Procedure
-1. **Commit** your work on a feature branch (the gate validates committed history, not the working tree).
+0. **Read `.agentic/project.md`** for branch naming, the verified test/lint commands, and what counts as
+   evidence in this repo. Follow the repo's conventions, not your own defaults.
+1. **Commit** your work on a feature branch cut from an up-to-date trunk (the gate validates committed
+   history, not the working tree). One concern per branch — if the branch carries an earlier issue's
+   commits too, stop and re-cut it from trunk.
 2. **Run the gate** (kunchenguid/no-mistakes):
    - First time in a repo: `no-mistakes init`
    - Then: `no-mistakes axi run`
