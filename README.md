@@ -16,7 +16,7 @@ that supports the standard. No step depends on another; pick what you need.
 |---|---|
 | **Existing project**, need to understand it | `orient` — that's the whole job |
 | **Existing project**, one task | `orient` → `plan-parallelize --single` → `execute-plan` → `pr-no-mistakes` |
-| **Existing project**, a backlog | `orient` → `plan-parallelize` → `run-batch` per agent |
+| **Existing project**, a backlog | `orient` → `plan-parallelize` → `orchestrate-team` → `run-batch` per worker |
 | **Existing project**, a pass over quality | `orient` → `security-audit` / `improve-ui-ux` |
 | **New project**, from nothing | `problem` → `spec` → `phases` → `issues` → `design` → `orient` → build |
 
@@ -40,9 +40,13 @@ Nothing is coupled — jump to whichever skill matches the task.
 | 8 | `pr-no-mistakes` | Runs the no-mistakes gate; PR description carries **screenshot (if UI) + scope + system impact** |
 
 Plus companions (independent of the 8-step core — run any time):
+- `orchestrate-team` — turns one approved master plan into a bounded team run. The leader assigns
+  non-overlapping worktree tracks, coordinates structured dependency/status messages, routes independent
+  review, replans stalled work, and returns one synthesized result. It stays single-agent when parallelism
+  would not help.
 - `run-batch` — hands one agent an ordered batch of issues and loops `plan-parallelize --single →
   execute-plan → pr-no-mistakes` per issue without stopping between them. Pair with step 6's waves to run
-  1-5 agents (any harness — Claude Code, Cursor, Codex) each churning through their own track unattended.
+  up to 4 worker worktrees (any harness — Claude Code, Cursor, Codex) on owned tracks unattended.
 - `install` — drops the whole library into whatever harness you're running.
 - `handoff` — a cross-cutting rescue that verifies and writes a resumable **baton** so an in-flight task
   can move to a fresh session on a bad approach, lost context, or session switch.
@@ -138,8 +142,8 @@ them to the PR as `@claude` comments and an agent answers on the thread (`addres
 **Typical run:** `problem → spec → phases → issues → design → plan-parallelize → execute-plan`, closing
 with `pr-no-mistakes` per PR. **Single task:** `plan-parallelize --single → execute-plan → pr-no-mistakes`.
 **Quick patch:** skip straight to `pr-no-mistakes`. **Batch across agents:** `plan-parallelize` splits the
-backlog into 1-5 tracks, then each agent runs `run-batch` on its own track to churn through every issue
-in it unattended.
+backlog into up to 4 tracks, `orchestrate-team` coordinates the run, and each worker uses `run-batch` on
+its own track to churn through every issue in it unattended.
 Every step inherits the rules in `constitution.md` — scope discipline, evidence before "done", small PRs.
 
 ## Developing this repo

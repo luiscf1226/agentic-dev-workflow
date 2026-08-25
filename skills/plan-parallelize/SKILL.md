@@ -25,10 +25,10 @@ After `issues`, before building. Scales from 1 to many issues.
 2. **Sub-plans (auto-governed):** for each issue write a sub-plan using `templates/sub-plan.md`
    (goal, files in scope, out of scope, approach, depends-on, test plan, evidence). A reviewer agent
    approves each against `constitution.md`; the human only sees exceptions (see constitution escalation rules).
-3. **Execute in bounded waves.** Never spawn the whole backlog. One worktree per track (1-5 agents —
-   e.g. one per harness: Claude Code, Cursor, Codex); respect file locks. Hand each track's ordered issue
-   list to `run-batch` so that agent loops the whole track to completion instead of stopping after one
-   issue.
+3. **Execute in bounded waves.** Never spawn the whole backlog. Use `orchestrate-team` to coordinate up
+   to 4 worker worktrees, one per track (e.g. Claude Code, Cursor, Codex); respect file locks. It hands
+   each track's ordered issue list to `run-batch` so that worker loops the whole track to completion
+   instead of stopping after one issue.
 4. **Optional — Lavish plan (ON REQUEST ONLY, never automatic):** when the user asks, promote a chosen
    issue (or the master plan) into an interactive Lavish plan for hands-on annotation:
    `npx lavish-axi <plan>.html`. Do not do this unless explicitly asked.
