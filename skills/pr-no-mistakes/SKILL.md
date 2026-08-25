@@ -1,6 +1,6 @@
 ---
 name: pr-no-mistakes
-description: Use before opening any pull request, to ship without breaking anything. Runs the no-mistakes validation gate (review, test, lint, PR, CI) and writes a PR description with a screenshot (if UI), the scope, and the system impact. Use for "open a PR", "ship it", "submit", "don't break anything".
+description: Use before opening any pull request, to ship without breaking anything. Runs the no-mistakes validation gate (review, test, lint, PR, CI) and writes a human-understandable PR description that briefs a tech lead or CTO before presenting optional implementation detail. Use for "open a PR", "ship it", "submit", "don't break anything".
 license: MIT
 ---
 
@@ -21,13 +21,24 @@ The final step, on a committed feature branch, before the PR reaches main.
    - Resolve findings: `no-mistakes axi respond --action fix|approve|skip`
    It covers intent, rebase, review, test, document, lint, push, PR, CI.
 3. **Write the PR description** from `templates/pr-description.md`. It REQUIRES:
+   - **Executive summary** — write as if briefing a tech lead or CTO who understands software but has
+     not followed the implementation. Explain the problem, the practical change, and why it matters in
+     2-4 plain-language sentences.
+   - **Before and after** — show the workflow or behavior change directly. Separate distinct changes
+     into bullets or rows; never compress the whole PR into one technical paragraph.
+   - **Impact before implementation** — explain user/team value, operational effect, risk, and rollout
+     before file names or internal mechanics. Define unavoidable jargon on first use.
+   - **Reviewer walkthrough** — where to start, what to inspect or try, and the expected result.
    - **Screenshot** — only if the change is visible/UI (before/after when useful).
    - **Scope** — what changed, which files, and what was deliberately left untouched.
    - **System impact** — blast radius (Low/Medium/High), what it affects, any migrations.
+   - **Optional implementation details last** — include only details that help the review. Do not make
+     the reviewer reconstruct intent from commit messages, file lists, or the diff.
 4. **Do not merge** if any gate is red or required evidence is missing.
 
 ## Output
-- A vetted PR whose description carries screenshot (if UI) + scope + system impact.
+- A vetted PR that a tech lead or CTO can understand from the executive summary, before/after behavior,
+  impact, risk, and reviewer walkthrough, with optional technical detail kept secondary.
 
 ## Note
 - No merge queue by design. Keep changes small and scoped so each PR is safe on its own.

@@ -16,7 +16,7 @@ that supports the standard. No step depends on another; pick what you need.
 |---|---|
 | **Existing project**, need to understand it | `orient` — that's the whole job |
 | **Existing project**, one task | `orient` → `plan-parallelize --single` → `execute-plan` → `pr-no-mistakes` |
-| **Existing project**, a backlog | `orient` → `plan-parallelize` → `run-batch` per agent |
+| **Existing project**, a backlog | `orient` → `plan-parallelize` → `orchestrate-team` → `run-batch` per worker |
 | **Existing project**, a pass over quality | `orient` → `security-audit` / `improve-ui-ux` |
 | **New project**, from nothing | `problem` → `spec` → `phases` → `issues` → `design` → `orient` → build |
 
@@ -37,12 +37,16 @@ Nothing is coupled — jump to whichever skill matches the task.
 | 5 | `design` | Full screens + design system, exports tokens |
 | 6 | `plan-parallelize` | Master plan + per-issue sub-plans + worktree waves. **Single mode (`--single`):** one issue → one sub-plan + baton. **Optional:** promote any issue to a Lavish plan (on request) |
 | 7 | `execute-plan` | Executes one approved sub-plan — auto-detects **create / modify / fix / test**, leaves evidence, keeps the baton current |
-| 8 | `pr-no-mistakes` | Runs the no-mistakes gate; PR description carries **screenshot (if UI) + scope + system impact** |
+| 8 | `pr-no-mistakes` | Runs the gate; writes an **executive-first PR briefing** a tech lead or CTO can review |
 
 Plus companions (independent of the 8-step core — run any time):
+- `orchestrate-team` — turns one approved master plan into a bounded team run. The leader assigns
+  non-overlapping worktree tracks, coordinates structured dependency/status messages, routes independent
+  review, replans stalled work, and returns one synthesized result. It stays single-agent when parallelism
+  would not help.
 - `run-batch` — hands one agent an ordered batch of issues and loops `plan-parallelize --single →
   execute-plan → pr-no-mistakes` per issue without stopping between them. Pair with step 6's waves to run
-  1-5 agents (any harness — Claude Code, Cursor, Codex) each churning through their own track unattended.
+  up to 4 worker worktrees (any harness — Claude Code, Cursor, Codex) on owned tracks unattended.
 - `install` — drops the whole library into whatever harness you're running.
 - `handoff` — a cross-cutting rescue that verifies and writes a resumable **baton** so an in-flight task
   can move to a fresh session on a bad approach, lost context, or session switch.
@@ -122,7 +126,8 @@ Run the steps in order, or jump to whichever one you need — nothing is coupled
    modify, fix, or test) and runs the matching approach, leaving evidence and keeping the baton current.
    If the session goes sideways, it invokes `handoff`.
 8. **`pr-no-mistakes`** — on a committed feature branch, runs the no-mistakes gate (review, test, lint,
-   PR, CI) and writes a PR description carrying **screenshot (if UI) + scope + system impact**. Its test
+   PR, CI) and writes an executive-first PR description: **summary, before/after behavior, why it
+   matters, reviewer walkthrough, scope, risk, evidence, and optional implementation detail**. Its test
    step doubles as the **pre-handoff checkpoint**.
 
 **Cross-cutting — `handoff`:** when a session hits a **bad approach, lost context, or a deliberate session
@@ -138,8 +143,8 @@ them to the PR as `@claude` comments and an agent answers on the thread (`addres
 **Typical run:** `problem → spec → phases → issues → design → plan-parallelize → execute-plan`, closing
 with `pr-no-mistakes` per PR. **Single task:** `plan-parallelize --single → execute-plan → pr-no-mistakes`.
 **Quick patch:** skip straight to `pr-no-mistakes`. **Batch across agents:** `plan-parallelize` splits the
-backlog into 1-5 tracks, then each agent runs `run-batch` on its own track to churn through every issue
-in it unattended.
+backlog into up to 4 tracks, `orchestrate-team` coordinates the run, and each worker uses `run-batch` on
+its own track to churn through every issue in it unattended.
 Every step inherits the rules in `constitution.md` — scope discipline, evidence before "done", small PRs.
 
 ## Developing this repo

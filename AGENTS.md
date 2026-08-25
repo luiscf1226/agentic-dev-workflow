@@ -16,15 +16,18 @@ verified commands, conventions, roles, risk areas) into one file every other ski
 re-discovering. Two entry paths:
 - **New project:** `orient` (once a skeleton exists) → `problem → spec → phases → issues → design → …`
 - **Existing project:** `orient` → jump straight to whatever the task needs (`problem` for a new feature,
-  `run-batch` for a backlog, `security-audit` / `improve-ui-ux` for a pass over what's there).
+  `orchestrate-team` for a parallel backlog, `security-audit` / `improve-ui-ux` for a pass over what's there).
 
 The full order is
 `orient → problem → spec → phases → issues → design → plan-parallelize → execute-plan → pr-no-mistakes`,
 but each is independent — run any subset. `handoff` is a cross-cutting rescue: invoke it from inside
 `execute-plan` when a session hits a bad approach, lost context, or a deliberate session switch.
+`orchestrate-team` is the leader for a bounded multi-agent run: it dispatches non-overlapping tracks,
+coordinates structured dependency/status messages, maintains the team ledger, routes independent
+review, and synthesizes one result. It falls back to one agent when the work is not safely parallel.
 `run-batch` is the batch driver: give one agent an ordered list of issues and it loops
 `plan-parallelize --single -> execute-plan -> pr-no-mistakes` per issue without stopping between them.
-Use it when 1-5 agents (one per harness/worktree) each own a track of the backlog.
+Use it as a worker under `orchestrate-team`, with up to 4 worktrees each owning a track of the backlog.
 `pr-review-page` is a post-PR companion: after a PR is open, it produces a self-contained interactive
 HTML review (summary, DB tables, endpoints, before/after screenshots) reviewers read instead of the diff.
 

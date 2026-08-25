@@ -7,9 +7,9 @@ license: MIT
 # Run Batch
 
 ## When to use
-You've split a backlog across 1–5 agents/terminals (any harness — Claude Code, Cursor, Codex, Gemini CLI)
-and want each one to churn through its assigned issues end-to-end, unattended, instead of stopping after
-every single issue for you to re-invoke it.
+`orchestrate-team` has split a backlog across up to 4 worker worktrees (any harness — Claude Code,
+Cursor, Codex, Gemini CLI), or the human has made the same bounded assignment, and each worker should
+churn through its assigned issues end-to-end without stopping after every issue.
 
 ## Input
 An ordered list of issue refs assigned to *this* agent (e.g. `#12, #14, #19`). Independent issues only —
