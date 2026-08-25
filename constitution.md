@@ -16,8 +16,8 @@ Shared rules every skill in this library inherits. Reviewers and gates enforce t
 - Every task ends with proof. UI change -> screenshot. Backend change -> query result or API response.
 
 ## Pull requests
-- Must use `templates/pr-description.md`: plain-language purpose and behavior, reviewer walkthrough,
-  screenshot (if UI), scope, system impact, and evidence.
+- Must use `templates/pr-description.md`: executive summary, before/after behavior, value, reviewer
+  walkthrough, screenshot (if UI), scope, risk, evidence, then optional technical detail.
 - Must pass the `no-mistakes` gate (review, test, lint, CI) before merge.
 - **One concern per branch, cut from an up-to-date trunk.** A branch carrying an earlier issue's commits
   is re-cut, not shipped — this is the failure mode batched/parallel runs hit most often.

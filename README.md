@@ -37,7 +37,7 @@ Nothing is coupled — jump to whichever skill matches the task.
 | 5 | `design` | Full screens + design system, exports tokens |
 | 6 | `plan-parallelize` | Master plan + per-issue sub-plans + worktree waves. **Single mode (`--single`):** one issue → one sub-plan + baton. **Optional:** promote any issue to a Lavish plan (on request) |
 | 7 | `execute-plan` | Executes one approved sub-plan — auto-detects **create / modify / fix / test**, leaves evidence, keeps the baton current |
-| 8 | `pr-no-mistakes` | Runs the no-mistakes gate; writes a **plain-language, reviewer-guided PR description** with evidence and impact |
+| 8 | `pr-no-mistakes` | Runs the gate; writes an **executive-first PR briefing** a tech lead or CTO can review |
 
 Plus companions (independent of the 8-step core — run any time):
 - `orchestrate-team` — turns one approved master plan into a bounded team run. The leader assigns
@@ -126,9 +126,9 @@ Run the steps in order, or jump to whichever one you need — nothing is coupled
    modify, fix, or test) and runs the matching approach, leaving evidence and keeping the baton current.
    If the session goes sideways, it invokes `handoff`.
 8. **`pr-no-mistakes`** — on a committed feature branch, runs the no-mistakes gate (review, test, lint,
-   PR, CI) and writes a human-understandable PR description: **why, observable behavior, reviewer
-   walkthrough, screenshot (if UI), scope, system impact, and evidence**. Its test step doubles as the
-   **pre-handoff checkpoint**.
+   PR, CI) and writes an executive-first PR description: **summary, before/after behavior, why it
+   matters, reviewer walkthrough, scope, risk, evidence, and optional implementation detail**. Its test
+   step doubles as the **pre-handoff checkpoint**.
 
 **Cross-cutting — `handoff`:** when a session hits a **bad approach, lost context, or a deliberate session
 switch**, `handoff` runs the test gate first (never hands off broken work), then writes a resumable
