@@ -58,6 +58,9 @@ and `execute-plan` instead.
    - only the leader may change scope, ownership, ordering, or the approved plan;
    - after the same blocker or evidence-free attempt repeats twice, stop that path, record the failed
      approaches, and replan or escalate instead of spending another worker blindly;
+   - if a worker takes a bad approach, loses context, or must be deliberately replaced, have that
+     worker invoke `handoff`: verify its state, write the resumable baton, stop the old session, and
+     assign the same bounded scope to a fresh worker that resumes from the baton's `Next` action;
    - do not let workers create their own subteams unless the approved plan explicitly delegates that
      authority and budget.
 7. **Review independently.** Route each completed unit and its evidence to the reviewer. Findings go

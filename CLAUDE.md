@@ -47,5 +47,6 @@ git check-ignore -v templates/*.md                      # nothing silently ignor
 
 ## Conventions
 - Branches: `feat/<slug>` (see git log).
-- PR descriptions follow `templates/pr-description.md`: scope + system impact + evidence.
+- PR descriptions follow `templates/pr-description.md`: plain-language purpose and behavior, a reviewer
+  walkthrough, scope, system impact, and evidence.
 - Agents open PRs; **humans merge** (`constitution.md`).
