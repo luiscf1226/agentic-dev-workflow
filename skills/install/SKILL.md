@@ -48,7 +48,7 @@ one-off project or globally.
    |-------|--------|
    | Entry (1) | `orient` |
    | Core (8) | `problem`, `spec`, `phases`, `issues`, `design`, `plan-parallelize`, `execute-plan`, `pr-no-mistakes` |
-   | Companions | `install`, `orchestrate-team`, `run-batch`, `handoff`, `pr-review-page`, `improve-ui-ux`, `security-audit`, `create-test-plan-demo`, `create-video`, `add-logger-watchdog` |
+   | Companions | `install`, `orchestrate-team`, `run-batch`, `handoff`, `pr-review-page`, `improve-ui-ux`, `security-audit`, `create-test-plan-demo`, `create-video`, `add-logger-watchdog`, `new-feature`, `code-structure`, `evidence-driven-testing`, `before-and-after` |
 
    In Claude Code, confirm skills appear (e.g. `/problem`, `/improve-ui-ux`).
    Report the destination path back to the user.

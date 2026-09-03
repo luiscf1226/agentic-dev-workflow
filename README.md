@@ -58,6 +58,10 @@ Plus companions (independent of the 8-step core — run any time):
 - `create-test-plan-demo` — step-by-step demo/QA test plan as Markdown under `docs/test-plans/`.
 - `create-video` — Playwright demo video with a visible fake cursor + click ripple (`demoClick` / `demoFill`).
 - `add-logger-watchdog` — structured logger (`info` / `security` / `error` / `warning`) + superadmin watchdog.
+- `new-feature` — isolate every task in its own git worktree/branch from trunk (scope-check open PRs first).
+- `code-structure` — actions/use-cases own why/when; a service layer owns reusable how.
+- `evidence-driven-testing` — prove the change with artifacts (UI captures or measured output), not prose.
+- `before-and-after` — PR-ready screenshot comparison table via `@vercel/before-and-after`.
 
 ## Working as a team
 - **Same version for everyone.** After `git pull`, re-run `./install.sh -g`. Teammates on stale skills
@@ -123,12 +127,15 @@ Run the steps in order, or jump to whichever one you need — nothing is coupled
    the waves: one issue → one sub-plan + a seeded **baton**. Optionally promote an issue to an interactive
    **Lavish** plan — only when you ask.
 7. **`execute-plan`** — executes one approved sub-plan/baton. It **auto-detects the task-type** (create,
-   modify, fix, or test) and runs the matching approach, leaving evidence and keeping the baton current.
-   If the session goes sideways, it invokes `handoff`.
+   modify, fix, or test) and runs the matching approach. Isolate first (`new-feature` if needed),
+   extract shared mechanics with `code-structure` when they repeat, leave evidence via
+   `evidence-driven-testing`, and keep the baton current. If the session goes sideways, it invokes
+   `handoff`.
 8. **`pr-no-mistakes`** — on a committed feature branch, runs the no-mistakes gate (review, test, lint,
    PR, CI) and writes an executive-first PR description: **summary, before/after behavior, why it
-   matters, reviewer walkthrough, scope, risk, evidence, and optional implementation detail**. Its test
-   step doubles as the **pre-handoff checkpoint**.
+   matters, reviewer walkthrough, scope, risk, evidence, and optional implementation detail**. UI PRs
+   embed a real screenshot pair (`before-and-after`). Its test step doubles as the **pre-handoff
+   checkpoint**.
 
 **Cross-cutting — `handoff`:** when a session hits a **bad approach, lost context, or a deliberate session
 switch**, `handoff` runs the test gate first (never hands off broken work), then writes a resumable
@@ -174,15 +181,24 @@ Referenced by these skills but **not shipped here** — install separately, or s
 - **no-mistakes** — the PR validation gate used by `pr-no-mistakes`. `npx skills add kunchenguid/no-mistakes` *(confirm exact skill name on its page)*
 - **address-pr-comments** — answers the `@claude` questions `pr-review-page` exports.
 - **run** — launches the app so `pr-review-page` can capture before/after screenshots.
+- **greploop** / **greploop-apps** — optional Greptile review loop until 5/5 with zero unresolved
+  comments. `npx skills add greptileai/skills`. Only when Greptile is installed on the target repo.
 
 ## Design choices
 - **No merge queue.** Keep PRs small and scoped; the `no-mistakes` gate makes each one safe on its own.
 - **Scope discipline.** Every skill enforces "touch only what you're asked."
-- **Evidence is the exit step.** Nothing is done without proof.
+- **Evidence is the exit step.** Nothing is done without proof (`evidence-driven-testing`). Capture
+  before while reproducing a defect; pair UI shots with `before-and-after`.
 - **One shared project map.** `orient` writes `.agentic/project.md` once; skills read it instead of
   re-deriving the stack per person, per run. Same repo → same picture, whoever is driving.
 - **Never invent a command.** Project commands are verified or marked `UNVERIFIED` — a fabricated test
   command that "passes" is worse than no evidence.
 - **Works on inherited code.** Every skill has an existing-project path, not just a greenfield one.
+- **Isolate before building.** `new-feature` gives each agent its own worktree from trunk; ports and
+  databases are still shared.
 
 See `constitution.md` for the shared rules every skill inherits.
+
+The isolate / service-layer / evidence / screenshot-table companions were adapted from
+[michaelshimeles/skills](https://github.com/michaelshimeles/skills) (and that repo's upstreams:
+`@vercel/before-and-after`, Greptile `greploop` kept as an optional external skill).

@@ -98,5 +98,7 @@ authorize an irreversible action.
 
 - Hub-and-spoke by default: workers report to the leader; peer communication is narrow and visible.
 - One worktree owns a file at a time. Overlapping work stays in one ordered track.
+- Dispatch uses `new-feature` isolation: no shared worktree, no borrowed port, no hand-merged lockfile.
+- A `result` without `evidence-driven-testing` artifacts is still in progress.
 - The leader owns coordination and the final answer; workers own only their assigned artifacts.
 - No worker reviews its own change, merges a PR, or expands its scope.

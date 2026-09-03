@@ -6,4 +6,4 @@
 - **Approach:** <3-6 steps>
 - **Depends on:** <upstream issues>
 - **Test plan:** <what proves it works>
-- **Evidence:** screenshot (UI) | query/API (backend)
+- **Evidence:** before/after screenshots or video (UI) | measured query/API output (backend) — via `evidence-driven-testing`

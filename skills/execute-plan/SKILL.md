@@ -20,15 +20,20 @@ before `pr-no-mistakes`. One issue at a time.
    - **fix** — defect → reproduce first, then patch the cause, not the symptom.
    - **test** — coverage → add tests that fail before the change and pass after.
    If the issue is mixed or the type is ambiguous, **stop and confirm** — never guess-route.
-2. **Execute within the sub-plan's scope only.** Touch only the files the sub-plan allows.
-3. **Leave evidence** per the sub-plan's test plan — screenshot (UI) or query/test run (backend).
-4. **Keep the baton current** (`templates/baton.md`): status, progress, next — as you go, not at the end.
+2. **Isolate if needed.** If you are not already on a unique worktree/branch cut from trunk, load
+   `new-feature` first. Confirm the app port is your process before trusting it.
+3. **Execute within the sub-plan's scope only.** Touch only the files the sub-plan allows.
+   When two or more flows share the same operational mechanics, load `code-structure` and extract the
+   repeated "how" instead of copy-pasting it.
+4. **Leave evidence** via `evidence-driven-testing`. For a **fix**, capture the failing before-state
+   *before* the patch. UI pairs go through `before-and-after` when a screenshot table is needed.
+5. **Keep the baton current** (`templates/baton.md`): status, progress, next — as you go, not at the end.
    If the session goes sideways (bad approach, lost context, session switch), invoke `handoff`.
-5. **Hand to `pr-no-mistakes`** once the sub-plan's "done" is met and evidence exists.
+6. **Hand to `pr-no-mistakes`** once the sub-plan's "done" is met and evidence exists.
 
 ## Output
 - Working, in-scope changes with evidence, and an up-to-date baton ready for `pr-no-mistakes`.
 
 ## Rules
 - One issue, one task-type, one scope. Mixed work goes back to `plan-parallelize` to split.
-- Reproduce before you fix; assert before you call a test done.
+- Reproduce before you fix; assert before you call a test done. A result without artifacts is not done.

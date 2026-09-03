@@ -21,7 +21,7 @@ tech lead or CTO who has not followed the implementation. Closes #ISSUE.>
 3. Expected: <observable result that demonstrates the change works>.
 
 ## Screenshot
-<ONLY if UI changed — before / after>
+<ONLY if UI changed — real before / after pair from `before-and-after` or `evidence-driven-testing`. Do not upload secrets to a public paste host.>
 
 ## Scope
 - Changed: <files / modules>

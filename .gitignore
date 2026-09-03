@@ -9,6 +9,9 @@
 # Project map is generated per-consuming-repo, not committed here
 /.agentic/
 
+# Evidence captures (uploaded to PRs, never committed)
+/.artifacts/
+
 # OS / editor cruft
 .DS_Store
 *.swp

@@ -9,11 +9,22 @@ Shared rules every skill in this library inherits. Reviewers and gates enforce t
   the repo. A fabricated command that appears to pass is worse than no evidence.
 - If the map is wrong, fix the map in the same PR. A stale map misleads everyone downstream.
 
+## Isolation
+- Never build on trunk. One worktree and one branch per task and per agent (`new-feature`).
+- Worktrees do not isolate ports, shared databases, or lockfiles. Confirm the process on a port is
+  yours before treating it as evidence. Regenerate lockfiles; never hand-merge them.
+- Before starting, scope-check open PRs' files. On overlap, stop and ask.
+
 ## Scope
 - Touch only the files the task/sub-plan names. No adjacent refactors.
+- Repeated operational mechanics belong in a service layer; domain policy stays in the calling flow
+  (`code-structure`). Do not extract one-off logic.
 
 ## Evidence
-- Every task ends with proof. UI change -> screenshot. Backend change -> query result or API response.
+- Every task ends with proof (`evidence-driven-testing`). UI change → before/after screenshots (or
+  video). Backend change → measured query/API output. Prose is not evidence.
+- Capture the **before** state while reproducing a defect, *before* writing the fix.
+- Evidence artifacts live in `.artifacts/` (not committed). Pair UI shots with `before-and-after`.
 
 ## Pull requests
 - Must use `templates/pr-description.md`: executive summary, before/after behavior, value, reviewer

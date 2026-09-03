@@ -29,7 +29,8 @@ same repo.
    - **Auth + roles** — how identity works and how roles are named (verbatim — `superadmin` vs `admin`
      matters to `add-logger-watchdog` and `security-audit`).
    - **Conventions** — branch naming, commit style, PR template, existing test style, existing design
-     tokens/theme. Prefer observed patterns (git log, existing files) over stated ones.
+     tokens/theme, and whether orchestration vs a shared service layer already exists. Prefer observed
+     patterns (git log, existing files) over stated ones.
    - **Environment** — required env vars **by name only** (never values), external services.
 2. **Verify the commands actually work.** Run the install, build, and test commands you found. A map
    that documents a broken or wrong command is worse than no map. Record what passed, what failed, and
@@ -48,7 +49,8 @@ same repo.
 ## How other skills use it
 Any skill with a "discover the stack / map the surface" step reads `.agentic/project.md` **first** and
 only investigates what the map doesn't cover — `improve-ui-ux`, `security-audit`,
-`create-test-plan-demo`, `add-logger-watchdog`, `execute-plan`, and `pr-no-mistakes` (for the real test
+`create-test-plan-demo`, `add-logger-watchdog`, `new-feature`, `code-structure`,
+`evidence-driven-testing`, `execute-plan`, and `pr-no-mistakes` (for the real test
 and lint commands).
 
 ## Rules
