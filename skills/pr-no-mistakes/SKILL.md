@@ -29,12 +29,16 @@ The final step, on a committed feature branch, before the PR reaches main.
    - **Impact before implementation** — explain user/team value, operational effect, risk, and rollout
      before file names or internal mechanics. Define unavoidable jargon on first use.
    - **Reviewer walkthrough** — where to start, what to inspect or try, and the expected result.
-   - **Screenshot** — only if the change is visible/UI (before/after when useful).
+   - **Screenshot** — if the change is visible/UI, embed a real before/after pair (`before-and-after`
+     and/or `evidence-driven-testing`). A description of the UI is not a screenshot.
    - **Scope** — what changed, which files, and what was deliberately left untouched.
    - **System impact** — blast radius (Low/Medium/High), what it affects, any migrations.
    - **Optional implementation details last** — include only details that help the review. Do not make
      the reviewer reconstruct intent from commit messages, file lists, or the diff.
 4. **Do not merge** if any gate is red or required evidence is missing.
+5. **Optional — Greptile loop.** If this repo has Greptile installed and the user asked for a
+   Greptile-clean review, run the external `greploop` skill (or `greploop-apps` when the PR is too
+   large for a normal trigger) after the no-mistakes gate. Skip when Greptile is not installed.
 
 ## Output
 - A vetted PR that a tech lead or CTO can understand from the executive summary, before/after behavior,

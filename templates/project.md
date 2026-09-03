@@ -53,6 +53,7 @@ Exact names as they appear in code (`superadmin` ≠ `admin`).
 - **Test style:** <framework + where tests live relative to source>
 - **PR requirements:** <template, required checks, reviewers>
 - **Evidence norm:** <what counts as proof here — screenshot tool, test output, query>
+- **Architecture:** <where orchestration vs shared services live, if the repo has that split>
 
 ## Environment
 Names only — **never values**.

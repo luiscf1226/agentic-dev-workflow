@@ -25,8 +25,9 @@ track, ordered; this skill does not resolve cross-issue file conflicts.
 ## Procedure
 For each issue in the batch, in order:
 
-1. **Start from a clean base — mandatory.** `git checkout <main> && git pull` before planning the issue,
-   so each issue's branch is cut from trunk.
+1. **Start from a clean base — mandatory.** Isolate with `new-feature` (or `git checkout <main> &&
+   git pull` inside this worker's assigned worktree) before planning the issue, so each issue's
+   branch is cut from trunk. Never reuse another issue's dirty tree.
    **Exception:** if the sub-plan's `Depends on` names an earlier issue in this batch whose PR is still
    open, branch from that issue's branch instead and say so in the PR description.
    *Skipping this is the single most likely way to corrupt a batch: without it, issue 2 branches off

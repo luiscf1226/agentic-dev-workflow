@@ -33,7 +33,7 @@ suite, and no CI.** Do not invent one, and do not claim a green test gate that d
 - **`.gitignore` patterns must be root-anchored** (`/phases.md`, not `phases.md`). A bare filename
   matches at any depth and will silently swallow `templates/phases.md` on `git add -A`.
 - External skills referenced but not shipped here: `no-mistakes`, `address-pr-comments`, `run`,
-  `lavish-axi`. Don't treat them as available.
+  `lavish-axi`, `greploop`. Don't treat them as available.
 
 ## Verifying a change
 No test suite, so check these by hand:

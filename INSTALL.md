@@ -86,7 +86,7 @@ There should be folders for the **core workflow** plus **companions**:
 | Group | Skills |
 |-------|--------|
 | Core (8) | `problem`, `spec`, `phases`, `issues`, `design`, `plan-parallelize`, `execute-plan`, `pr-no-mistakes` |
-| Companions | `install`, `orchestrate-team`, `run-batch`, `handoff`, `pr-review-page`, `improve-ui-ux`, `security-audit`, `create-test-plan-demo`, `create-video`, `add-logger-watchdog` |
+| Companions | `install`, `orchestrate-team`, `run-batch`, `handoff`, `pr-review-page`, `improve-ui-ux`, `security-audit`, `create-test-plan-demo`, `create-video`, `add-logger-watchdog`, `new-feature`, `code-structure`, `evidence-driven-testing`, `before-and-after` |
 
 In Claude Code, type `/problem` — if it's recognized, you're done. 🎉
 Also try a companion such as `/improve-ui-ux` or `/security-audit`.

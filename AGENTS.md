@@ -31,19 +31,23 @@ Use it as a worker under `orchestrate-team`, with up to 4 worktrees each owning 
 `pr-review-page` is a post-PR companion: after a PR is open, it produces a self-contained interactive
 HTML review (summary, DB tables, endpoints, before/after screenshots) reviewers read instead of the diff.
 
-Five more companions are also independent (not part of the core order) — load any of them when
-the task matches:
+The isolate → build → prove → ship companions sit beside the core order:
+`new-feature` (isolate a worktree), `code-structure` (service layer vs orchestration),
+`evidence-driven-testing` (proof, not prose), `before-and-after` (PR screenshot table).
+
+Five more quality companions are also independent — load any of them when the task matches:
 `improve-ui-ux`, `security-audit`, `create-test-plan-demo`, `create-video`, `add-logger-watchdog`.
 
 **External skills** referenced but not shipped here — install separately or skip the step:
 `no-mistakes` (the PR gate), `address-pr-comments` (answers PR questions), `run` (launch the app for
-screenshots), `lavish-axi` (interactive HTML plans).
+screenshots), `lavish-axi` (interactive HTML plans), `greploop` / `greploop-apps` (optional Greptile
+review loop — `npx skills add greptileai/skills`).
 After `git pull`, refresh installed copies with `./install.sh -g` (or project-scoped `./install.sh`).
 
 ## Non-negotiables (apply to every skill)
 1. **Surface assumptions before building.** If requirements conflict, stop and ask.
 2. **Touch only what you're asked.** No drive-by refactors.
-3. **Leave evidence.** A task is not done without proof (test run, screenshot, query, log).
+3. **Leave evidence.** A task is not done without proof (test run, before/after screenshot or video, query, log). Capture the failing before-state before writing a fix.
 4. **Keep PRs small.** One concern per PR.
 5. **A human owns irreversible calls** (problem agreement, merge to main).
 6. **Never invent a project command.** Test/lint/run commands come from `.agentic/project.md` (verified by

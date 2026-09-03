@@ -37,5 +37,12 @@ After `issues`, before building. Scales from 1 to many issues.
 - Master plan, per-issue sub-plans, worktree assignment. Optionally a Lavish plan (on request).
 - Single mode: one approved sub-plan + a seeded baton (`templates/baton.md`) for `execute-plan`.
 
+## Isolation
+When assigning worktrees, apply `new-feature`: unique branch from up-to-date trunk, scope-check open
+PRs, gitignored worktree path, fresh install inside the worktree. Honor harness-managed worktrees
+(Claude Code / Cursor) — do not double-create. Worktrees do not isolate ports or databases; say so
+in the master plan if two tracks need the same service.
+
 ## Rules
 - Each agent touches only files in its sub-plan's scope.
+- Never reuse another agent's worktree, branch, or uncommitted work.
